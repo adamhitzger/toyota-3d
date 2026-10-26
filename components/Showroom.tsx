@@ -1,8 +1,8 @@
 "use client"
 
 import { Canvas } from "@react-three/fiber"
-import { createXRStore, XR } from "@react-three/xr";
-import { Suspense, useRef, useState } from "react"
+import { createXRStore, IfInSessionMode, useXR, XR } from "@react-three/xr";
+import { ReactNode, Suspense, useRef, useState } from "react"
 import { ActionName, Model } from "./Model"
 import { ContactShadows, Environment, OrbitControls } from "@react-three/drei"
 
@@ -11,6 +11,19 @@ const COLORS: Array<string> = ["#c8102e", "#ffffff", "#111111", "#1e3a8a", "#9ca
 const store = createXRStore({
   enterGrantedSession: false,
 });
+
+// The model is ~18.9 units long, the real GR Corolla is 4.41 m and WebXR works in metres
+const AR_SCALE = 4.41 / 18.9
+
+function CarStage({ children }: { children: ReactNode }){
+    const isAR = useXR((s) => s.mode === "immersive-ar")
+    return (
+        // In AR the origin is the floor right under the user, so park the car 4 m in front of them
+        <group scale={isAR ? AR_SCALE : 1} position={isAR ? [0, 0, -4] : [0, 0, 0]}>
+            {children}
+        </group>
+    )
+}
 
 export default function ShowroomScene(){
     const [paint, setPaint] = useState("#c8102e")
@@ -50,27 +63,32 @@ export default function ShowroomScene(){
                 }}
             >
                 <XR store={store}>
-                <color attach={"background"} args={["white"]}/>
-                <Suspense 
+                {/* A solid background would cover the camera feed in AR */}
+                <IfInSessionMode deny="immersive-ar">
+                    <color attach={"background"} args={["white"]}/>
+                </IfInSessionMode>
+                <Suspense
                     fallback={null}
                 >
-                    <Model
-                        paintColor={paint}
-                        animation={animation}
-                        onAnimationEnd={handleAnimationEnd}
-                    />
-                    
-                    <Environment 
-                        preset="city" 
-                    />
-                    {/* Large enough to cover the whole drive path, so the shadow travels with the car */}
-                    <ContactShadows
-                        position={[0, 0, 0]}
-                        opacity={0.6}
-                        scale={90}
-                        resolution={2048}
-                        far={6}
-                        blur={2}
+                    <CarStage>
+                        <Model
+                            paintColor={paint}
+                            animation={animation}
+                            onAnimationEnd={handleAnimationEnd}
+                        />
+                        {/* Large enough to cover the whole drive path, so the shadow travels with the car */}
+                        <ContactShadows
+                            position={[0, 0, 0]}
+                            opacity={0.6}
+                            scale={90}
+                            resolution={2048}
+                            far={6}
+                            blur={2}
+                        />
+                    </CarStage>
+
+                    <Environment
+                        preset="city"
                     />
                     <OrbitControls 
                         enablePan={false} 
