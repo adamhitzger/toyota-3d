@@ -15,12 +15,55 @@ const store = createXRStore({
 // The model is ~18.9 units long, the real GR Corolla is 4.41 m and WebXR works in metres
 const AR_SCALE = 4.41 / 18.9
 
+// Any XR session counts: headsets and the desktop emulator report an AR session as "immersive-vr"
+// (the store derives mode from environmentBlendMode), so checking for "immersive-ar" alone misses them
+const IN_XR = ["immersive-ar", "immersive-vr"] as const
+
 function CarStage({ children }: { children: ReactNode }){
-    const isAR = useXR((s) => s.mode === "immersive-ar")
+    const inXR = useXR((s) => s.session != null)
     return (
-        // In AR the origin is the floor right under the user, so park the car 4 m in front of them
-        <group scale={isAR ? AR_SCALE : 1} position={isAR ? [0, 0, -4] : [0, 0, 0]}>
+        // In XR the origin is the floor right under the user, so park the car 4 m in front of them
+        <group scale={inXR ? AR_SCALE : 1} position={inXR ? [0, 0, -4] : [0, 0, 0]}>
             {children}
+        </group>
+    )
+}
+
+// DOM buttons are not visible on headsets, so in XR the paint picker lives in the scene.
+// Pointer events here work with controllers, hands and screen taps on phones.
+function XRPaintPicker({ selected, onPick }: { selected: string, onPick: (c: string) => void }){
+    const [hovered, setHovered] = useState<string | null>(null)
+    const spacing = 0.15
+    return (
+        // Waist height, an arm's length away, tilted towards the user
+        <group position={[0, 0.95, -0.9]} rotation={[-0.45, 0, 0]}>
+            <mesh position={[0, 0, -0.012]}>
+                <planeGeometry args={[spacing * COLORS.length + 0.04, 0.2]} />
+                <meshBasicMaterial color="#0f0f10" transparent opacity={0.55} />
+            </mesh>
+            {COLORS.map((c, i) => (
+                <group
+                    key={c}
+                    position={[(i - (COLORS.length - 1) / 2) * spacing, 0, 0]}
+                    scale={hovered === c ? 1.15 : 1}
+                >
+                    <mesh
+                        rotation={[Math.PI / 2, 0, 0]}
+                        onClick={(e) => { e.stopPropagation(); onPick(c) }}
+                        onPointerOver={() => setHovered(c)}
+                        onPointerOut={() => setHovered((h) => (h === c ? null : h))}
+                    >
+                        <cylinderGeometry args={[0.05, 0.05, 0.02, 48]} />
+                        <meshStandardMaterial color={c} roughness={0.35} metalness={0.2} />
+                    </mesh>
+                    {c === selected && (
+                        <mesh>
+                            <torusGeometry args={[0.064, 0.006, 12, 48]} />
+                            <meshBasicMaterial color="#f2f2ef" />
+                        </mesh>
+                    )}
+                </group>
+            ))}
         </group>
     )
 }
@@ -63,9 +106,12 @@ export default function ShowroomScene(){
                 }}
             >
                 <XR store={store}>
-                {/* A solid background would cover the camera feed in AR */}
-                <IfInSessionMode deny="immersive-ar">
+                {/* A solid background would cover the camera feed / passthrough */}
+                <IfInSessionMode deny={IN_XR}>
                     <color attach={"background"} args={["white"]}/>
+                </IfInSessionMode>
+                <IfInSessionMode allow={IN_XR}>
+                    <XRPaintPicker selected={selected} onPick={choosePaint} />
                 </IfInSessionMode>
                 <Suspense
                     fallback={null}
