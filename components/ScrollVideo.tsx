@@ -8,21 +8,42 @@ import { ReactNode, useRef } from "react"
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
 // Video průletu se nepřehrává samo, jeho čas řídí scroll přes ScrollTrigger: sekce je
-// SCROLL_VH vysoká, video v ní drží sticky přes celou obrazovku. Soubory jsou kódované
+// scrollVh vysoká, video v ní drží sticky přes celou obrazovku. Soubory jsou kódované
 // jen z klíčových snímků (keyint=1), takže každý seek dekóduje jediný snímek.
 //
 // Videa jsou dvě: na šířku (16:9) a na výšku (9:16, mobil). Viditelnost přepíná Tailwind
 // (portrait:/landscape:), ale stahuje a ovládá se jen to, které odpovídá orientaci (gsap.matchMedia).
-const SCROLL_VH = 500
-const DURATION = 390 / 30
-// Od snímku 350 video stojí před kobercem → tehdy vyjede auto (prvky s data-reveal)
-const HOLD_AT = 350 / 30
+const FPS = 30
 // Jak dlouho (v s) se čas videa dotahuje za scrollem, vyhlazuje rychlé scrollování
 const SCRUB = 0.6
 // video zabírá 90 % scrollu, poslední kus jen drží auto na koberci
 const VIDEO_END = 0.9
 
-export default function ScrollVideo({ children }: { children?: ReactNode }) {
+// Výchozí je celý průlet shora (390 snímků). Od snímku `holdAt` video stojí před kobercem
+// → tehdy vyjede auto (prvky s data-reveal).
+type Props = {
+    children?: ReactNode
+    src?: string
+    srcTall?: string
+    poster?: string
+    posterTall?: string
+    frames?: number
+    holdAt?: number
+    scrollVh?: number
+}
+
+export default function ScrollVideo({
+    children,
+    src = "/video/pruchod-showroomem.mp4",
+    srcTall = "/video/pruchod-showroomem-vyska.mp4",
+    poster = "/video/pruchod-poster.jpg",
+    posterTall = "/video/pruchod-poster-vyska.jpg",
+    frames = 390,
+    holdAt = 350,
+    scrollVh = 500,
+}: Props) {
+    const DURATION = frames / FPS
+    const HOLD_AT = holdAt / FPS
     const section = useRef<HTMLElement>(null)
     const wide = useRef<HTMLVideoElement>(null)
     const tall = useRef<HTMLVideoElement>(null)
@@ -91,11 +112,11 @@ export default function ScrollVideo({ children }: { children?: ReactNode }) {
                 },
             )
         },
-        { scope: section },
+        { scope: section, dependencies: [DURATION, HOLD_AT] },
     )
 
     return (
-        <section ref={section} className="relative w-full" style={{ height: `${SCROLL_VH}vh` }}>
+        <section ref={section} className="relative w-full" style={{ height: `${scrollVh}vh` }}>
             <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#0F0F10]">
                 {/* Plocha videa vždy přes celou obrazovku (jako object-cover), takže procenta
                     z koberec_pozice_*.json sedí na obraz. */}
@@ -103,8 +124,8 @@ export default function ScrollVideo({ children }: { children?: ReactNode }) {
                     <video
                         ref={wide}
                         className="absolute inset-0 h-full w-full"
-                        src="/video/pruchod-showroomem.mp4"
-                        poster="/video/pruchod-poster.jpg"
+                        src={src}
+                        poster={poster}
                         muted
                         playsInline
                         preload="none"
@@ -115,8 +136,8 @@ export default function ScrollVideo({ children }: { children?: ReactNode }) {
                     <video
                         ref={tall}
                         className="absolute inset-0 h-full w-full"
-                        src="/video/pruchod-showroomem-vyska.mp4"
-                        poster="/video/pruchod-poster-vyska.jpg"
+                        src={srcTall}
+                        poster={posterTall}
                         muted
                         playsInline
                         preload="none"
