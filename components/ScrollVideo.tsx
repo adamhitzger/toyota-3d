@@ -1,88 +1,130 @@
 "use client"
 
-import { ReactNode, useEffect, useRef } from "react"
+import { useGSAP } from "@gsap/react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { ReactNode, useRef } from "react"
 
-// Video průletu se nepřehrává samo, jeho čas řídí scroll: sekce je SCROLL_VH vysoká,
-// video v ní drží sticky přes celou obrazovku. Soubor je kódovaný s klíčovým snímkem
-// každých 5 snímků, jinak by přetáčení sekalo.
+gsap.registerPlugin(ScrollTrigger, useGSAP)
+
+// Video průletu se nepřehrává samo, jeho čas řídí scroll přes ScrollTrigger: sekce je
+// SCROLL_VH vysoká, video v ní drží sticky přes celou obrazovku. Soubory jsou kódované
+// jen z klíčových snímků (keyint=1), takže každý seek dekóduje jediný snímek.
+//
+// Videa jsou dvě: na šířku (16:9) a na výšku (9:16, mobil). Viditelnost přepíná Tailwind
+// (portrait:/landscape:), ale stahuje a ovládá se jen to, které odpovídá orientaci (gsap.matchMedia).
 const SCROLL_VH = 500
-// Dotahování času k cíli (0–1 za snímek): menší = plynulejší, ale víc „plave“ za scrollem
-const LERP = 0.15
-// Od tohoto času video stojí před kobercem (snímek 350 z 390) → sticky vrstva dostane data-end
-const END_AT = 350 / 30
+const DURATION = 390 / 30
+// Od snímku 350 video stojí před kobercem → tehdy vyjede auto (prvky s data-reveal)
+const HOLD_AT = 350 / 30
+// Jak dlouho (v s) se čas videa dotahuje za scrollem, vyhlazuje rychlé scrollování
+const SCRUB = 0.6
+// video zabírá 90 % scrollu, poslední kus jen drží auto na koberci
+const VIDEO_END = 0.9
 
 export default function ScrollVideo({ children }: { children?: ReactNode }) {
     const section = useRef<HTMLElement>(null)
-    const video = useRef<HTMLVideoElement>(null)
-    const stage = useRef<HTMLDivElement>(null)
+    const wide = useRef<HTMLVideoElement>(null)
+    const tall = useRef<HTMLVideoElement>(null)
 
-    useEffect(() => {
-        const el = section.current
-        const v = video.current
-        const st = stage.current
-        if (!el || !v || !st) return
+    useGSAP(
+        () => {
+            const mm = gsap.matchMedia()
+            mm.add(
+                // gsap volá funkci, jen když platí aspoň jedna podmínka → obě orientace zvlášť
+                {
+                    portrait: "(orientation: portrait)",
+                    landscape: "(orientation: landscape)",
+                    reduced: "(prefers-reduced-motion: reduce)",
+                },
+                (ctx) => {
+                    const { portrait, reduced } = ctx.conditions!
+                    const v = (portrait ? tall : wide).current!
+                    if (v.preload !== "auto") {
+                        v.preload = "auto"
+                        v.load()
+                    }
 
-        let target = 0
-        let current = 0
-        let raf = 0
+                    // seek jen když předchozí doběhl, jinak se fronta seeků hromadí a obraz stojí
+                    let wanted = 0
+                    const seek = () => {
+                        if (!v.seeking && v.readyState >= 1 && Math.abs(v.currentTime - wanted) > 0.001) v.currentTime = wanted
+                    }
+                    v.addEventListener("seeked", seek)
+                    v.addEventListener("loadedmetadata", seek)
 
-        const progress = () => {
-            const r = el.getBoundingClientRect()
-            const range = r.height - window.innerHeight
-            return range > 0 ? Math.min(Math.max(-r.top / range, 0), 1) : 0
-        }
-        const onScroll = () => {
-            if (v.duration) target = progress() * v.duration
-        }
-        const tick = () => {
-            if (v.duration) {
-                const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-                current = reduced ? target : current + (target - current) * LERP
-                // seekovat jen při znatelné změně, ať prohlížeč nestojí ve frontě seeků
-                if (Math.abs(v.currentTime - current) > 0.01 && !v.seeking) v.currentTime = current
-                const end = String(current >= END_AT - 0.05)
-                if (st.dataset.end !== end) st.dataset.end = end
-            }
-            raf = requestAnimationFrame(tick)
-        }
-        // iOS Safari dovolí seek až po prvním přehrání
-        const unlock = () => {
-            v.play().then(() => v.pause()).catch(() => {})
-        }
+                    const playhead = { t: 0 }
+                    const tl = gsap.timeline({
+                        defaults: { ease: "none" },
+                        scrollTrigger: {
+                            trigger: section.current,
+                            start: "top top",
+                            end: "bottom bottom",
+                            scrub: reduced ? true : SCRUB,
+                        },
+                    })
+                    tl.to(playhead, {
+                        t: DURATION,
+                        duration: VIDEO_END,
+                        onUpdate: () => {
+                            wanted = Math.min(playhead.t, DURATION - 0.01)
+                            seek()
+                        },
+                    })
+                    // úvodní nadpis zmizí hned na začátku průletu
+                    tl.to("[data-intro]", { autoAlpha: 0, y: -40, ease: "power2.in", duration: 0.07 }, 0)
+                    tl.fromTo(
+                        "[data-reveal]",
+                        { autoAlpha: 0, y: 24 },
+                        { autoAlpha: 1, y: 0, ease: "expo.out", duration: 0.08, stagger: 0.02 },
+                        (HOLD_AT / DURATION) * VIDEO_END,
+                    )
 
-        v.addEventListener("loadedmetadata", onScroll)
-        window.addEventListener("scroll", onScroll, { passive: true })
-        window.addEventListener("resize", onScroll)
-        window.addEventListener("touchstart", unlock, { once: true, passive: true })
-        onScroll()
-        raf = requestAnimationFrame(tick)
-        return () => {
-            cancelAnimationFrame(raf)
-            v.removeEventListener("loadedmetadata", onScroll)
-            window.removeEventListener("scroll", onScroll)
-            window.removeEventListener("resize", onScroll)
-            window.removeEventListener("touchstart", unlock)
-        }
-    }, [])
+                    // iOS Safari dovolí seek až po prvním přehrání
+                    const unlock = () => v.play().then(() => v.pause()).catch(() => {})
+                    window.addEventListener("touchstart", unlock, { once: true, passive: true })
+                    return () => {
+                        v.removeEventListener("seeked", seek)
+                        v.removeEventListener("loadedmetadata", seek)
+                        window.removeEventListener("touchstart", unlock)
+                    }
+                },
+            )
+        },
+        { scope: section },
+    )
 
     return (
         <section ref={section} className="relative w-full" style={{ height: `${SCROLL_VH}vh` }}>
-            <div ref={stage} data-end="false" className="group sticky top-0 h-screen w-full overflow-hidden bg-[#0F0F10]">
-                {/* Plocha 16:9 vždy přes celou obrazovku (jako object-cover), takže procenta
-                    z koberec_pozice.json sedí na obraz videa. */}
-                <div className="absolute left-1/2 top-1/2 aspect-video w-[max(100vw,177.78vh)] -translate-x-1/2 -translate-y-1/2">
+            <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#0F0F10]">
+                {/* Plocha videa vždy přes celou obrazovku (jako object-cover), takže procenta
+                    z koberec_pozice_*.json sedí na obraz. */}
+                <div className="absolute left-1/2 top-1/2 aspect-video w-[max(100vw,177.78vh)] -translate-x-1/2 -translate-y-1/2 portrait:hidden">
                     <video
-                        ref={video}
+                        ref={wide}
                         className="absolute inset-0 h-full w-full"
                         src="/video/pruchod-showroomem.mp4"
                         poster="/video/pruchod-poster.jpg"
                         muted
                         playsInline
-                        preload="auto"
+                        preload="none"
                         aria-label="Průlet showroomem Toyota Vysočina"
                     />
                 </div>
-                {/* vrstva nad videem, na konci průletu má rodič data-end="true" (group-data-[end=true]:…) */}
+                <div className="absolute left-1/2 top-1/2 aspect-[9/16] w-[max(100vw,56.25vh)] -translate-x-1/2 -translate-y-1/2 landscape:hidden">
+                    <video
+                        ref={tall}
+                        className="absolute inset-0 h-full w-full"
+                        src="/video/pruchod-showroomem-vyska.mp4"
+                        poster="/video/pruchod-poster-vyska.jpg"
+                        muted
+                        playsInline
+                        preload="none"
+                        aria-label="Průlet showroomem Toyota Vysočina"
+                    />
+                </div>
+                {/* vrstva nad videem: data-intro zmizí se začátkem scrollu, data-reveal se odkryje,
+                    až video zastaví před kobercem */}
                 {children}
             </div>
         </section>
