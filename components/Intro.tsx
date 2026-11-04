@@ -15,7 +15,7 @@ export default function Intro() {
                 </p>
                 <p className="mt-5 flex items-center gap-2 font-body text-base text-[#B9B9B4] md:text-lg">
                     <MapPin aria-hidden className="size-5 shrink-0 text-[#E2001A]" strokeWidth={2} />
-                    Jihlavská 4421, Havlíčkův Brod
+                    Rantířovská 4844/6, Jihlava
                 </p>
             </div>
         </div>
