@@ -19,31 +19,14 @@ const SCRUB = 0.6
 // video zabírá 90 % scrollu, poslední kus jen drží auto na koberci
 const VIDEO_END = 0.9
 
-// Výchozí je celý průlet shora (390 snímků). Od snímku `holdAt` video stojí před kobercem
-// → tehdy vyjede auto (prvky s data-reveal).
-type Props = {
-    children?: ReactNode
-    src?: string
-    srcTall?: string
-    poster?: string
-    posterTall?: string
-    frames?: number
-    holdAt?: number
-    scrollVh?: number
-}
+// Průlet začíná před vchodem do showroomu (155 snímků). Od snímku HOLD_AT video stojí před
+// kobercem → tehdy se odkryje nabídka vozů (data-reveal, data-reveal-panel, data-reveal-tile).
+const DURATION = 155 / FPS
+const HOLD_AT = 114 / FPS
+// výška sekce ve vh = délka scrollu, přes kterou video běží
+const SCROLL_VH = 250
 
-export default function ScrollVideo({
-    children,
-    src = "/video/pruchod-showroomem.mp4",
-    srcTall = "/video/pruchod-showroomem-vyska.mp4",
-    poster = "/video/pruchod-poster.jpg",
-    posterTall = "/video/pruchod-poster-vyska.jpg",
-    frames = 390,
-    holdAt = 350,
-    scrollVh = 500,
-}: Props) {
-    const DURATION = frames / FPS
-    const HOLD_AT = holdAt / FPS
+export default function ScrollVideo({ children }: { children?: ReactNode }) {
     const section = useRef<HTMLElement>(null)
     const wide = useRef<HTMLVideoElement>(null)
     const tall = useRef<HTMLVideoElement>(null)
@@ -94,11 +77,21 @@ export default function ScrollVideo({
                     })
                     // úvodní nadpis zmizí hned na začátku průletu
                     tl.to("[data-intro]", { autoAlpha: 0, y: -40, ease: "power2.in", duration: 0.07 }, 0)
+                    // před kobercem se odkryje vrstva nabídky: panel Nabídka vozů vyjede zprava
+                    // (na výšku zespodu) a dlaždice po něm postupně dosednou
+                    const hold = (HOLD_AT / DURATION) * VIDEO_END
+                    tl.fromTo("[data-reveal]", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, hold)
                     tl.fromTo(
-                        "[data-reveal]",
-                        { autoAlpha: 0, y: 24 },
-                        { autoAlpha: 1, y: 0, ease: "expo.out", duration: 0.08, stagger: 0.02 },
-                        (HOLD_AT / DURATION) * VIDEO_END,
+                        "[data-reveal-panel]",
+                        portrait ? { yPercent: 115 } : { xPercent: 115 },
+                        { xPercent: 0, yPercent: 0, ease: "expo.out", duration: 0.08 },
+                        hold,
+                    )
+                    tl.fromTo(
+                        "[data-reveal-tile]",
+                        { autoAlpha: 0, y: 16 },
+                        { autoAlpha: 1, y: 0, ease: "expo.out", duration: 0.06, stagger: 0.01 },
+                        hold + 0.02,
                     )
 
                     // iOS Safari dovolí seek až po prvním přehrání
@@ -112,20 +105,22 @@ export default function ScrollVideo({
                 },
             )
         },
-        { scope: section, dependencies: [DURATION, HOLD_AT] },
+        { scope: section },
     )
 
     return (
-        <section ref={section} className="relative w-full" style={{ height: `${scrollVh}vh` }}>
-            <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#0F0F10]">
+        <section ref={section} className="relative w-full" style={{ height: `${SCROLL_VH}vh` }}>
+            {/* h-svh = výška viditelná i s lištami prohlížeče; s h-screen by na mobilu panel a ovládání
+                dole skončily pod spodní lištou Safari a ťuknutí by šlo do ní */}
+            <div className="sticky top-0 h-svh w-full overflow-hidden bg-[#0F0F10]">
                 {/* Plocha videa vždy přes celou obrazovku (jako object-cover), takže procenta
                     z koberec_pozice_*.json sedí na obraz. */}
                 <div className="absolute left-1/2 top-1/2 aspect-video w-[max(100vw,177.78vh)] -translate-x-1/2 -translate-y-1/2 portrait:hidden">
                     <video
                         ref={wide}
                         className="absolute inset-0 h-full w-full"
-                        src={src}
-                        poster={poster}
+                        src="/video/pruchod-showroomem.mp4"
+                        poster="/video/pruchod-poster.jpg"
                         muted
                         playsInline
                         preload="none"
@@ -136,15 +131,15 @@ export default function ScrollVideo({
                     <video
                         ref={tall}
                         className="absolute inset-0 h-full w-full"
-                        src={srcTall}
-                        poster={posterTall}
+                        src="/video/pruchod-showroomem-vyska.mp4"
+                        poster="/video/pruchod-poster-vyska.jpg"
                         muted
                         playsInline
                         preload="none"
                         aria-label="Průlet showroomem Toyota Vysočina"
                     />
                 </div>
-                {/* vrstva nad videem: data-intro zmizí se začátkem scrollu, data-reveal se odkryje,
+                {/* vrstva nad videem: data-intro zmizí se začátkem scrollu, data-reveal* se odkryjí,
                     až video zastaví před kobercem */}
                 {children}
             </div>

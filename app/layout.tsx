@@ -13,15 +13,21 @@ const geistMono = Geist_Mono({
 });
 
 // DESIGN.md: Zalando Sans Expanded na nadpisy, Atkinson Hyperlegible Next na čtený text
+// next/font nemá pro Zalando Sans Expanded ani Atkinson Hyperlegible Next metriky, ze kterých
+// počítá upravený fallback (varování „Failed to find font override values“) → fallback ručně
 const display = Zalando_Sans_Expanded({
   variable: "--font-zalando-expanded",
   subsets: ["latin", "latin-ext"],
   weight: ["800", "900"],
+  adjustFontFallback: false,
+  fallback: ["Arial Black", "Arial", "sans-serif"],
 });
 
 const body = Atkinson_Hyperlegible_Next({
   variable: "--font-atkinson",
   subsets: ["latin", "latin-ext"],
+  adjustFontFallback: false,
+  fallback: ["system-ui", "Arial", "sans-serif"],
 });
 
 export const metadata: Metadata = {

@@ -1,14 +1,14 @@
 import { MapPin } from "lucide-react"
 
-// Úvod přes první záběr průletu (pohled shora). Zmizí se začátkem scrollu (data-intro, ScrollVideo).
+// Úvod přes první záběr průletu (před vchodem). Zmizí se začátkem scrollu (data-intro, ScrollVideo).
 export default function Intro() {
     return (
         <div data-intro className="pointer-events-none absolute inset-0 bg-[#0F0F10]/40">
             <div className="absolute inset-x-6 bottom-[22vh] text-[#F2F2EF] md:inset-x-16 md:bottom-auto md:top-[24vh]">
-                <h1 className="font-display text-[clamp(2.75rem,10vw,10rem)] font-black uppercase leading-[0.95] tracking-[-0.035em]">
+                <h1 className="font-display text-[clamp(2.25rem,10vw,10rem)] font-black uppercase leading-[0.95] tracking-[-0.035em]">
                     Toyota
                     <br />
-                    Vysočina
+                    Vysočina.cz
                 </h1>
                 <p className="mt-6 max-w-[34ch] font-body text-lg leading-snug md:mt-8 md:text-xl">
                     Vítejte v Toyota Showroomu. Co vás k nám přivádí?

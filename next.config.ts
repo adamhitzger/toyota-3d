@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   experimental: {
     agentFeedback: true,
   },
+  // dev server z telefonu v lokální síti (https://192.168.x.x:3000), jinak Next zablokuje dev JS
+  // a stránka se neoživí (nic nejde kliknout)
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*", "*.local"],
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

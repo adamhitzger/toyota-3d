@@ -12,6 +12,19 @@
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-zalando-expanded);
   --font-body: var(--font-atkinson);
+
+  /* DESIGN.md · Color */
+  --color-paper: #ececea;
+  --color-paper-2: #e1e1de;
+  --color-panel: #f7f7f5;
+  --color-hair: #c4c4c0;
+  --color-ink: #0f0f10;
+  --color-ink-2: #48484c;
+  --color-on-ink: #f2f2ef;
+  --color-on-ink-2: #b9b9b4;
+  --color-red: #e2001a;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (prefers-color-scheme: dark) {

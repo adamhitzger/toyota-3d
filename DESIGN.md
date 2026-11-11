@@ -3,6 +3,7 @@
 Zdroj pravdy: Figma „Toyota Vysočina – 3D Showroom“, stránka **„v3 – Luxury (Swiss industrial)“**
 https://www.figma.com/design/vpDMGGsZprFJJrfG43pwH0
 (v1 tmavá a v2 světlá AAA zůstávají ve stejném souboru jako archiv.)
+Aktuální web (scroll průlet + auto na koberci) je na stránce **„v4 – Průlet (video)“**: úvod a auto na koberci pro desktop i mobil, komponenta „Přepínač modelu“ a klíčové snímky průletu.
 
 ## Visual Theme
 
