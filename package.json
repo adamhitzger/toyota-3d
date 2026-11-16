@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --experimental-https",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@next/third-parties": "^16.4.6",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@react-three/xr": "^6.6.32",
@@ -25,9 +26,12 @@
     "next-sanity": "^13.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "react-hot-toast": "^2.6.1",
     "sanity": "^5.31.2",
+    "server-only": "^0.0.1",
     "styled-components": "^6.6.0",
-    "three": "^0.186.1"
+    "three": "^0.186.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

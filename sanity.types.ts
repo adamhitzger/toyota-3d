@@ -15,6 +15,46 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
+export type Dotaz = {
+  _id: string;
+  _type: "dotaz";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  tema?: "novy-vuz" | "ojety-vuz" | "testovaci-jizda" | "servis" | "jine";
+  jmeno?: string;
+  telefon?: string;
+  email?: string;
+  zprava?: string;
+  souhlas?: boolean;
+  vytvoreno?: string;
+};
+
+export type VuzReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "vuz";
+};
+
+export type Poptavka = {
+  _id: string;
+  _type: "poptavka";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  vuz?: VuzReference;
+  nazevVozu?: string;
+  barva?: string;
+  jmeno?: string;
+  telefon?: string;
+  email?: string;
+  kontakt?: "telefon" | "email";
+  poznamka?: string;
+  souhlas?: boolean;
+  vytvoreno?: string;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: "reference";
@@ -233,6 +273,9 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | Dotaz
+  | VuzReference
+  | Poptavka
   | SanityImageAssetReference
   | VariantaVozu
   | ModelReference

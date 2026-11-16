@@ -127,7 +127,7 @@ export default function ScrollVideo({ children }: { children?: ReactNode }) {
                         aria-label="Průlet showroomem Toyota Vysočina"
                     />
                 </div>
-                <div className="absolute left-1/2 top-1/2 aspect-[9/16] w-[max(100vw,56.25vh)] -translate-x-1/2 -translate-y-1/2 landscape:hidden">
+                <div className="absolute left-1/2 top-1/2 aspect-9/16 w-[max(100vw,56.25vh)] -translate-x-1/2 -translate-y-1/2 landscape:hidden">
                     <video
                         ref={tall}
                         className="absolute inset-0 h-full w-full"
@@ -137,7 +137,7 @@ export default function ScrollVideo({ children }: { children?: ReactNode }) {
                         playsInline
                         preload="none"
                         aria-label="Průlet showroomem Toyota Vysočina"
-                    />
+                    /> 
                 </div>
                 {/* vrstva nad videem: data-intro zmizí se začátkem scrollu, data-reveal* se odkryjí,
                     až video zastaví před kobercem */}
