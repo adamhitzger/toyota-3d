@@ -27,4 +27,15 @@ Retain qualifying friction even if it is later fixed or worked around; record th
 
 Before the final response, run one reporting pass. If candidates remain, from this file's directory run `npx --no-install next internal agent-feedback-instructions` once without piping or truncating its output. Follow its output or error guidance. If a network sandbox blocks it, retry with network access; if it still returns no output, continue normally.
 
+## Prompt pro stahnutí a vložení modelů do sanity
+Projekt ~/NEXTJS/spinar-showroom (Sanity 2wyuauqh / production).
+  Naimportuj fotky vozu z Toyota CDN do Sanity. - https://images.toyota-europe.com/cz/product-token/1b5e747e-5650-41ad-81db-3b3863cb08a2/vehicle/e0f53533-0482-43be-93f8-c3a285ce5a26/width/1600/height/900/scale-mode/1/padding/12/background-colour/FFFFFF/image-quality/75/day-exterior-0_M51_FB91.webp
+  - Aygo X Style, 
+  - Modrá levandulová, 
+  - Hybrid, 
+  - 529000 kč, 
+  zde mas pak jeste delsi 3 odazy s barvami - 
+  - https://images.toyota-europe.com/cz/product-token/1b5e747e-5650-41ad-81db-3b3863cb08a2/vehicle/     e0f53533-0482-43be-93f8-c3a285ce5a26/width/2048/height/1165/scale-mode/1/padding/0/image-quality/75/day-exterior-0_2VN_FB60.webp(zelená urban), 
+  - https://images.toyota-europe.com/cz/product-token/1b5e747e-5650-41ad-81db-3b3863cb08a2/vehicle/e0f53533-0482-43be-93f8-c3a285ce5a26/width/2048/height/1165/scale-mode/1/padding/0/image-quality/75/day-exterior-0_M14_FB90.webp(stříbrná), 
+  - https://images.toyota-europe.com/cz/product-token/1b5e747e-5650-41ad-81db-3b3863cb08a2/vehicle/e0f53533-0482-43be-93f8-c3a285ce5a26/width/2048/height/1165/scale-mode/1/padding/0/image-quality/75/day-exterior-0_M49_FB40.webp(hněda mědená)
 <!-- END:nextjs-agent-feedback -->

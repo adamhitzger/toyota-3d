@@ -299,7 +299,7 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: VOZY_QUERY
-// Query: *[_type == "vuz" && defined(slug.current)]    | order(cenaOd asc, nazev asc) {   _id,  nazev,  verze,  "slug": slug.current,  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },  kategorie,  cenaOd,  typMotoru,  "foto": varianty[0].fotky[0]{   _key,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },  hotspot,  crop },  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex } }
+// Query: *[_type == "vuz" && defined(slug.current)]    | order(cenaOd asc, nazev asc) {   _id,  nazev,  verze,  "slug": slug.current,  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },  kategorie,  cenaOd,  typMotoru,  "foto": varianty[0].fotky[0]{   _key,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },  hotspot,  crop },  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex, "foto": fotky[0]{   _key,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },  hotspot,  crop } } }
 export type VOZY_QUERY_RESULT = Array<{
   _id: string;
   nazev: string;
@@ -340,12 +340,28 @@ export type VOZY_QUERY_RESULT = Array<{
     _key: string;
     nazevBarvy: string;
     hex: string | null;
+    foto: {
+      _key: string;
+      asset: {
+        _id: string;
+        url: string;
+        metadata: {
+          lqip: string | null;
+          dimensions: {
+            width: number;
+            height: number;
+          } | null;
+        } | null;
+      } | null;
+      hotspot: SanityImageHotspot | null;
+      crop: SanityImageCrop | null;
+    } | null;
   }>;
 }>;
 
 // Source: sanity/lib/queries.ts
 // Variable: VOZY_PODLE_POHONU_QUERY
-// Query: *[_type == "vuz" && defined(slug.current) && typMotoru == $typMotoru]    | order(cenaOd asc, nazev asc) {   _id,  nazev,  verze,  "slug": slug.current,  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },  kategorie,  cenaOd,  typMotoru,  "foto": varianty[0].fotky[0]{   _key,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },  hotspot,  crop },  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex } }
+// Query: *[_type == "vuz" && defined(slug.current) && typMotoru == $typMotoru]    | order(cenaOd asc, nazev asc) {   _id,  nazev,  verze,  "slug": slug.current,  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },  kategorie,  cenaOd,  typMotoru,  "foto": varianty[0].fotky[0]{   _key,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },  hotspot,  crop },  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex, "foto": fotky[0]{   _key,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },  hotspot,  crop } } }
 export type VOZY_PODLE_POHONU_QUERY_RESULT = Array<{
   _id: string;
   nazev: string;
@@ -386,12 +402,28 @@ export type VOZY_PODLE_POHONU_QUERY_RESULT = Array<{
     _key: string;
     nazevBarvy: string;
     hex: string | null;
+    foto: {
+      _key: string;
+      asset: {
+        _id: string;
+        url: string;
+        metadata: {
+          lqip: string | null;
+          dimensions: {
+            width: number;
+            height: number;
+          } | null;
+        } | null;
+      } | null;
+      hotspot: SanityImageHotspot | null;
+      crop: SanityImageCrop | null;
+    } | null;
   }>;
 }>;
 
 // Source: sanity/lib/queries.ts
 // Variable: VOZY_MODELU_QUERY
-// Query: *[_type == "vuz" && defined(slug.current) && model._ref == $modelId && kategorie == $kategorie]    | order(cenaOd asc, nazev asc) {   _id,  nazev,  verze,  "slug": slug.current,  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },  kategorie,  cenaOd,  typMotoru,  "foto": varianty[0].fotky[0]{   _key,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },  hotspot,  crop },  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex } }
+// Query: *[_type == "vuz" && defined(slug.current) && model._ref == $modelId && kategorie == $kategorie]    | order(cenaOd asc, nazev asc) {   _id,  nazev,  verze,  "slug": slug.current,  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },  kategorie,  cenaOd,  typMotoru,  "foto": varianty[0].fotky[0]{   _key,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },  hotspot,  crop },  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex, "foto": fotky[0]{   _key,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },  hotspot,  crop } } }
 export type VOZY_MODELU_QUERY_RESULT = Array<{
   _id: string;
   nazev: string;
@@ -432,6 +464,22 @@ export type VOZY_MODELU_QUERY_RESULT = Array<{
     _key: string;
     nazevBarvy: string;
     hex: string | null;
+    foto: {
+      _key: string;
+      asset: {
+        _id: string;
+        url: string;
+        metadata: {
+          lqip: string | null;
+          dimensions: {
+            width: number;
+            height: number;
+          } | null;
+        } | null;
+      } | null;
+      hotspot: SanityImageHotspot | null;
+      crop: SanityImageCrop | null;
+    } | null;
   }>;
 }>;
 
@@ -541,9 +589,9 @@ export type VARIANTA_FOTKY_QUERY_RESULT = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "vuz" && defined(slug.current)]\n    | order(cenaOd asc, nazev asc) { \n  _id,\n  nazev,\n  verze,\n  "slug": slug.current,\n  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },\n  kategorie,\n  cenaOd,\n  typMotoru,\n  "foto": varianty[0].fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n },\n  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex }\n }\n': VOZY_QUERY_RESULT;
-    '\n  *[_type == "vuz" && defined(slug.current) && typMotoru == $typMotoru]\n    | order(cenaOd asc, nazev asc) { \n  _id,\n  nazev,\n  verze,\n  "slug": slug.current,\n  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },\n  kategorie,\n  cenaOd,\n  typMotoru,\n  "foto": varianty[0].fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n },\n  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex }\n }\n': VOZY_PODLE_POHONU_QUERY_RESULT;
-    '\n  *[_type == "vuz" && defined(slug.current) && model._ref == $modelId && kategorie == $kategorie]\n    | order(cenaOd asc, nazev asc) { \n  _id,\n  nazev,\n  verze,\n  "slug": slug.current,\n  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },\n  kategorie,\n  cenaOd,\n  typMotoru,\n  "foto": varianty[0].fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n },\n  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex }\n }\n': VOZY_MODELU_QUERY_RESULT;
+    '\n  *[_type == "vuz" && defined(slug.current)]\n    | order(cenaOd asc, nazev asc) { \n  _id,\n  nazev,\n  verze,\n  "slug": slug.current,\n  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },\n  kategorie,\n  cenaOd,\n  typMotoru,\n  "foto": varianty[0].fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n },\n  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex, "foto": fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n } }\n }\n': VOZY_QUERY_RESULT;
+    '\n  *[_type == "vuz" && defined(slug.current) && typMotoru == $typMotoru]\n    | order(cenaOd asc, nazev asc) { \n  _id,\n  nazev,\n  verze,\n  "slug": slug.current,\n  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },\n  kategorie,\n  cenaOd,\n  typMotoru,\n  "foto": varianty[0].fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n },\n  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex, "foto": fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n } }\n }\n': VOZY_PODLE_POHONU_QUERY_RESULT;
+    '\n  *[_type == "vuz" && defined(slug.current) && model._ref == $modelId && kategorie == $kategorie]\n    | order(cenaOd asc, nazev asc) { \n  _id,\n  nazev,\n  verze,\n  "slug": slug.current,\n  "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },\n  kategorie,\n  cenaOd,\n  typMotoru,\n  "foto": varianty[0].fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n },\n  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex, "foto": fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n } }\n }\n': VOZY_MODELU_QUERY_RESULT;
     '\n  *[_type == "model" && defined(slug.current)]{\n    _id,\n    nazev,\n    "slug": slug.current,\n    typyMotoru,\n    "vozy": *[_type == "vuz" && model._ref == ^._id && kategorie == $kategorie]\n      | order(cenaOd asc){ cenaOd, "foto": varianty[0].fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n } }\n  }[count(vozy) > 0]{\n    _id,\n    nazev,\n    slug,\n    "pocetVozu": count(vozy),\n    "cenaOd": vozy[0].cenaOd,\n    typyMotoru,\n    "foto": vozy[0].foto\n  } | order(nazev asc)\n': MODELY_QUERY_RESULT;
     '\n  *[_type == "vuz" && slug.current == $slug][0]{\n    _id,\n    nazev,\n    verze,\n    "slug": slug.current,\n    "model": model->{ _id, nazev, "slug": slug.current, typyMotoru },\n    kategorie,\n    cenaOd,\n    typMotoru,\n    varianty[]{\n      _key,\n      nazevBarvy,\n      "hex": barva.hex,\n      "foto": fotky[0]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n },\n      "pocetFotek": count(fotky)\n    },\n    "verzeModelu": *[_type == "vuz" && model._ref == ^.model._ref && kategorie == ^.kategorie && defined(slug.current)]\n      | order(cenaOd asc){ _id, nazev, verze, "slug": slug.current, cenaOd }\n  }\n': VUZ_QUERY_RESULT;
     '\n  *[_type == "vuz" && slug.current == $slug][0]\n    .varianty[_key == $variantaKey][0]\n    .fotky[1..-1]{ \n  _key,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop\n }\n': VARIANTA_FOTKY_QUERY_RESULT;

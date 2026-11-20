@@ -39,3 +39,72 @@ body {
   color: var(--foreground);
   font-family: var(--font-body), system-ui, sans-serif;
 }
+
+/* Úvod (components/Intro.tsx): nástup po prvcích, pořadí z --i, krok 90 ms */
+.intro-in {
+  animation: intro-in 900ms var(--ease-expo) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 150ms);
+}
+@keyframes intro-in {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}
+/* řádek nadpisu vyjede zpod ořezu */
+.intro-radek {
+  animation: intro-radek 1100ms var(--ease-expo) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 150ms);
+}
+@keyframes intro-radek {
+  from {
+    translate: 0 105%;
+  }
+}
+/* „Skladem“: červený pruh se protáhne zleva, pak jemně pulzuje */
+.intro-skladem::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-red);
+  transform-origin: left;
+  animation:
+    intro-pruh 700ms var(--ease-expo) both,
+    intro-puls 2.4s ease-in-out 2s infinite;
+  animation-delay: calc(var(--i, 0) * 90ms + 300ms), calc(var(--i, 0) * 90ms + 1500ms);
+}
+.intro-skladem > span {
+  animation: intro-in 700ms var(--ease-expo) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 450ms);
+}
+@keyframes intro-pruh {
+  from {
+    scale: 0 1;
+  }
+}
+@keyframes intro-puls {
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-red) 25%, transparent);
+  }
+}
+/* nápověda ke scrollu: dílek čáry stéká dolů */
+.intro-scroll {
+  animation: intro-scroll 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes intro-scroll {
+  from {
+    translate: 0 -100%;
+  }
+  to {
+    translate: 0 200%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-in,
+  .intro-radek,
+  .intro-skladem::before,
+  .intro-skladem > span,
+  .intro-scroll {
+    animation: none;
+  }
+}

@@ -59,10 +59,10 @@ export default function Nabidka({ data }: { data: Data }) {
         }
     }, [slug, detaily])
 
-    // dokud detail nedorazí, stačí hlavní fotka z karty vozu
+    // dokud detail nedorazí, stačí hlavní fotky barev z karty vozu
     const varianty: Varianta[] =
         detail?.varianty ??
-        (karta?.barvy[0] ? [{ ...karta.barvy[0], foto: karta.foto, pocetFotek: 1 }] : [])
+        (karta?.barvy.map((b) => ({ ...b, foto: b.foto ?? karta.foto, pocetFotek: 1 })) ?? [])
     const barva = varianty.find((v) => v._key === barvaKey) ?? varianty[0]
     const verzeModelu = detail?.verzeModelu ?? (karta ? [{ _id: karta._id, nazev: karta.nazev, verze: karta.verze, slug: karta.slug, cenaOd: karta.cenaOd }] : [])
     const vozyModelu = karta ? data.vozy.filter((v) => v.model._id === karta.model._id && v.kategorie === karta.kategorie) : []
@@ -198,7 +198,15 @@ export default function Nabidka({ data }: { data: Data }) {
             />
             <div inert={!poptavka} className={`pointer-events-none absolute inset-0 ${prechod} ${poptavka ? "" : "invisible translate-y-full"}`}>
                 {karta && (
-                    <Poptavka key={`${karta.slug}-${otevreniPoptavky}`} vuz={karta} verze={vozyModelu} barvaKey={barva?._key} foto={barva?.foto ?? karta.foto} onZavrit={() => setPoptavka(false)} />
+                    <Poptavka
+                        key={otevreniPoptavky}
+                        vuz={karta}
+                        verze={vozyModelu}
+                        barvaKey={barvaKey ?? barva?._key}
+                        onVuz={vyberVuz}
+                        onBarva={setBarvaKey}
+                        onZavrit={() => setPoptavka(false)}
+                    />
                 )}
             </div>
         </div>

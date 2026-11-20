@@ -14,7 +14,7 @@ export default function Mapa() {
                 {nacist ? (
                     <iframe
                         src={MAPA_EMBED}
-                        title="Mapa: Toyota Vysočina, Rantířovská 4844/6, Jihlava"
+                        title="Mapa: Toyota Vysočina.cz, Rantířovská 4844/6, Jihlava"
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                         className="absolute inset-0 size-full border-0"

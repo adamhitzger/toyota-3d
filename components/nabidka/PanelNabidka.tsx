@@ -12,7 +12,7 @@ export default function PanelNabidka({ onVyber }: { onVyber: (k: Kategorie) => v
             className="flex flex-col gap-3.5 border border-ink bg-panel p-4 md:h-full md:gap-6 md:p-8"
         >
             <div className="flex flex-col gap-1.5 uppercase md:gap-3">
-                <Stitek>[ Toyota Vysočina ]</Stitek>
+                <Stitek>[ Toyota Vysočina.cz ]</Stitek>
                 <h2 className="font-display text-[26px] font-black leading-[0.95] tracking-[-0.03em] text-ink md:text-[40px]">Nabídka vozů</h2>
             </div>
             <ul className="flex gap-2 md:min-h-0 md:flex-1 md:flex-col md:gap-3">

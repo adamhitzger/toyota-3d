@@ -26,6 +26,12 @@ const HOLD_AT = 114 / FPS
 // výška sekce ve vh = délka scrollu, přes kterou video běží
 const SCROLL_VH = 250
 
+// Posun na konec průletu, kde stojí nabídka vozů (tlačítko v úvodu). Pozice v px od začátku stránky.
+export function konecPruletu() {
+    const s = document.getElementById("prulet")
+    return s ? s.offsetTop + s.offsetHeight - window.innerHeight : 0
+}
+
 export default function ScrollVideo({ children }: { children?: ReactNode }) {
     const section = useRef<HTMLElement>(null)
     const wide = useRef<HTMLVideoElement>(null)
@@ -109,7 +115,7 @@ export default function ScrollVideo({ children }: { children?: ReactNode }) {
     )
 
     return (
-        <section ref={section} className="relative w-full" style={{ height: `${SCROLL_VH}vh` }}>
+        <section ref={section} id="prulet" className="relative w-full" style={{ height: `${SCROLL_VH}vh` }}>
             {/* h-svh = výška viditelná i s lištami prohlížeče; s h-screen by na mobilu panel a ovládání
                 dole skončily pod spodní lištou Safari a ťuknutí by šlo do ní */}
             <div className="sticky top-0 h-svh w-full overflow-hidden bg-[#0F0F10]">
@@ -124,7 +130,7 @@ export default function ScrollVideo({ children }: { children?: ReactNode }) {
                         muted
                         playsInline
                         preload="none"
-                        aria-label="Průlet showroomem Toyota Vysočina"
+                        aria-label="Průlet showroomem Toyota Vysočina.cz"
                     />
                 </div>
                 <div className="absolute left-1/2 top-1/2 aspect-9/16 w-[max(100vw,56.25vh)] -translate-x-1/2 -translate-y-1/2 landscape:hidden">
@@ -136,7 +142,7 @@ export default function ScrollVideo({ children }: { children?: ReactNode }) {
                         muted
                         playsInline
                         preload="none"
-                        aria-label="Průlet showroomem Toyota Vysočina"
+                        aria-label="Průlet showroomem Toyota Vysočina.cz"
                     /> 
                 </div>
                 {/* vrstva nad videem: data-intro zmizí se začátkem scrollu, data-reveal* se odkryjí,

@@ -76,7 +76,7 @@ export default function Menu({ className = "" }: { className?: string }) {
                         onClick={() => setOtevreno(false)}
                         className="whitespace-nowrap font-display text-[14px] font-black uppercase tracking-[-0.02em] md:text-[19px]"
                     >
-                        {FIRMA.znacka}.cz
+                        {FIRMA.znacka}
                     </Link>
                     <button
                         ref={zavrit}

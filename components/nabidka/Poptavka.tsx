@@ -22,24 +22,26 @@ const pole = "h-14 w-full aria-invalid:border-red border-[1.5px] border-ink bg-p
 
 // Poptávka (Figma 128:693 desktop / 128:769 mobil): vlevo shrnutí vybraného vozu, vpravo formulář
 // s předvybraným vozem a barvou. Mobil má souhlas a odeslání přilepené dole.
+// Vůz a barvu drží Nabidka: změna ve formuláři přepne i auto na koberci.
 export default function Poptavka({
-    vuz,
+    vuz: vybrany,
     verze,
     barvaKey,
-    foto,
+    onVuz,
+    onBarva,
     onZavrit,
 }: {
     vuz: Vuz
     // vozy stejného modelu v kategorii, mezi kterými jde ve formuláři přepnout
     verze: Vuz[]
     barvaKey: string | undefined
-    foto: Fotka | null
+    onVuz: (slug: string) => void
+    onBarva: (key: string) => void
     onZavrit: () => void
 }) {
-    const [slug, setSlug] = useState(vuz.slug)
-    const vybrany = verze.find((v) => v.slug === slug) ?? vuz
-    const [barva, setBarva] = useState<string | undefined>(barvaKey ?? vybrany.barvy[0]?._key)
-    const vybranaBarva = vybrany.barvy.find((b) => b._key === barva) ?? vybrany.barvy[0]
+    const slug = vybrany.slug
+    const vybranaBarva = vybrany.barvy.find((b) => b._key === barvaKey) ?? vybrany.barvy[0]
+    const foto: Fotka | null = vybranaBarva?.foto ?? vybrany.foto
     const [kontakt, setKontakt] = useState<"telefon" | "email">("telefon")
     // server action odeslatPoptavku (zod + zápis do Sanity), po úspěchu obrazovka „Děkujeme“
     const [state, formAction, isPending] = useActionState<ActionResponse<PoptavkaInputs>, FormData>(odeslatPoptavku, initialActionState)
@@ -52,13 +54,6 @@ export default function Poptavka({
         "aria-invalid": e?.[k] ? true : undefined,
         "aria-describedby": e?.[k] ? `${id}-${k}-chyba` : undefined,
     })
-
-    const zmenVerzi = (s: string) => {
-        setSlug(s)
-        // barvu podle názvu přenést, pokud ji nová verze má
-        const nova = verze.find((v) => v.slug === s)
-        setBarva(nova?.barvy.find((b) => b.nazevBarvy === vybranaBarva?.nazevBarvy)?._key ?? nova?.barvy[0]?._key)
-    }
 
     const radky: [string, ReactNode][] = [
         ["Model", `${vybrany.model.nazev} ${vybrany.verze ?? ""}`.trim()],
@@ -146,14 +141,14 @@ export default function Poptavka({
                                     Prodejce z Jihlavy se vám ozve s nabídkou a termínem testovací jízdy.
                                 </p>
                                 <div className="flex gap-2.5 md:gap-4">
-                                    <Vyber label="Model" value={slug} onChange={zmenVerzi}>
+                                    <Vyber label="Model" value={slug} onChange={onVuz}>
                                         {verze.map((v) => (
                                             <option key={v.slug} value={v.slug}>
                                                 {v.nazev}
                                             </option>
                                         ))}
                                     </Vyber>
-                                    <Vyber label="Barva" value={vybranaBarva?._key ?? ""} onChange={setBarva} vzorek={vybranaBarva?.hex}>
+                                    <Vyber label="Barva" value={vybranaBarva?._key ?? ""} onChange={onBarva} vzorek={vybranaBarva?.hex}>
                                         {vybrany.barvy.map((b) => (
                                             <option key={b._key} value={b._key}>
                                                 {b.nazevBarvy}

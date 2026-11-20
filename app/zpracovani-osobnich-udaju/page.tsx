@@ -38,7 +38,7 @@ const UCELY = [
 ]
 
 const COOKIES = [
-    ["cookie_souhlas", "Toyota Vysočina", "Uloží vaši volbu v liště cookies (nezbytná)", "6 měsíců"],
+    ["cookie_souhlas", "Toyota Vysočina.cz", "Uloží vaši volbu v liště cookies (nezbytná)", "6 měsíců"],
     ["_ga, _ga_*", "Google Analytics", "Rozlišení návštěvníků pro statistiky", "2 roky"],
     ["_gcl_au", "Google Ads", "Měření konverzí z reklam", "90 dní"],
     ["_fbp", "Meta", "Měření reklam a remarketing", "90 dní"],

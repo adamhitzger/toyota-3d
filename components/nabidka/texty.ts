@@ -40,4 +40,4 @@ export const verze = (n: number) => plural(n, "verze", "verze", "verzí")
 const czk = new Intl.NumberFormat("cs-CZ", { style: "currency", currency: "CZK", maximumFractionDigits: 0 })
 export const cena = (n: number) => czk.format(n)
 
-export const PRODEJNA = "Toyota Vysočina, Rantířovská 4844/6, Jihlava"
+export const PRODEJNA = "Toyota Vysočina.cz, Rantířovská 4844/6, Jihlava"

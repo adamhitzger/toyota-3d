@@ -15,7 +15,7 @@ export function Ramec({ aktivni, children }: { aktivni?: string; children: React
         <div className="flex min-h-dvh flex-col bg-paper text-ink">
             <header className="flex items-center justify-between gap-4 border-b-[1.5px] border-ink px-4 py-2 md:px-16 md:py-3.5">
                 <Link href="/" className="whitespace-nowrap font-display text-[14px] font-black uppercase tracking-[-0.02em] md:text-[19px]">
-                    {FIRMA.znacka}.cz
+                    {FIRMA.znacka}
                 </Link>
                 <div className="flex items-center gap-9">
                     <nav aria-label="Hlavní" className="hidden items-center gap-9 md:flex">
@@ -38,7 +38,7 @@ export function Ramec({ aktivni, children }: { aktivni?: string; children: React
             <main className="flex-1">{children}</main>
             <footer className="flex flex-col gap-6 bg-ink px-4 py-8 text-on-ink md:flex-row md:items-start md:justify-between md:gap-12 md:px-16 md:py-11">
                 <div className="flex flex-col gap-2">
-                    <p className="font-display text-[17px] font-black uppercase tracking-[-0.02em]">{FIRMA.znacka}.cz</p>
+                    <p className="font-display text-[17px] font-black uppercase tracking-[-0.02em]">{FIRMA.znacka}</p>
                     <p className="text-[15px] text-on-ink-2">{ADRESA}</p>
                 </div>
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-8">

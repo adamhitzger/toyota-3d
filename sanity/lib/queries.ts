@@ -8,7 +8,8 @@ const fotkaFragment = /* groq */ `
   crop
 `
 
-// Karta vozu v seznamu: hlavní fotka první varianty + barvy na výběr
+// Karta vozu v seznamu: hlavní fotka první varianty + barvy na výběr (každá s hlavní fotkou,
+// aby poptávka ukázala správné auto i bez detailu vozu)
 const vuzKartaFragment = /* groq */ `
   _id,
   nazev,
@@ -19,7 +20,7 @@ const vuzKartaFragment = /* groq */ `
   cenaOd,
   typMotoru,
   "foto": varianty[0].fotky[0]{ ${fotkaFragment} },
-  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex }
+  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex, "foto": fotky[0]{ ${fotkaFragment} } }
 `
 
 /** Seznam všech vozů, nejlevnější první. */

@@ -9,7 +9,7 @@ import { pageSeo, strankaLd } from "@/lib/seo"
 
 const SEO = {
     title: "Kontakt",
-    description: "Prodej a servis Toyota Vysočina, Rantířovská 4844/6, Jihlava. Napište nám nebo se zastavte v showroomu.",
+    description: "Prodej a servis Toyota Vysočina.cz, Rantířovská 4844/6, Jihlava. Napište nám nebo se zastavte v showroomu.",
     path: "/kontakt",
 }
 export const metadata: Metadata = pageSeo(SEO)

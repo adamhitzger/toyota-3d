@@ -46,6 +46,7 @@ export const metadata: Metadata = {
     "Toyota",
     "Toyota Jihlava",
     "Toyota Vysočina",
+    "Toyota Vysočina.cz",
     "autosalon Jihlava",
     "nové vozy Toyota",
     "skladové vozy",

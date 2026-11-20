@@ -7,7 +7,7 @@ import { FIRMA } from "@/lib/firma"
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.toyota-vysocina.cz").replace(/\/$/, "")
 export const NAZEV_WEBU = `${FIRMA.znacka} · 3D showroom`
 export const POPIS_WEBU =
-    "Projděte si showroom Toyota Vysočina v Jihlavě online: nové, skladové i předváděcí vozy Toyota s cenami a poptávkou na jedno kliknutí."
+    "Projděte si showroom Toyota Vysočina.cz v Jihlavě online: nové, skladové i předváděcí vozy Toyota s cenami a poptávkou na jedno kliknutí."
 
 // OG obrázek 1200×630 (public/og.jpg). Stránky s vlastním openGraph ho musí uvést znovu,
 // Next z rodiče nedědí jen část objektu.
