@@ -1,5 +1,5 @@
 // Údaje provozovatele na stránkách Kontakt a Zpracování osobních údajů.
-// TODO před spuštěním: doplnit skutečnou firmu, IČO, spisovou značku, telefony, e-maily a otevírací dobu
+// TODO před spuštěním: doplnit skutečnou firmu, IČO, spisovou značku, telefony a e-maily
 // (v návrhu ve Figmě jsou také jen zástupné hodnoty, viz poznámka 190:1871).
 export const FIRMA = {
     znacka: "Toyota Vysočina.cz",
@@ -14,7 +14,8 @@ export const FIRMA = {
     emailGdpr: "gdpr@toyota-vysocina.cz",
     // otevírací doba: text na Kontaktu i openingHoursSpecification v JSON-LD (lib/seo.ts)
     hodiny: [
-        { dny: "Každý den", schema: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], od: "08:00", do: "17:00" },
+        { dny: "Po–Pá", schema: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], od: "08:00", do: "17:00" },
+        { dny: "So", schema: ["Saturday"], od: "09:00", do: "12:00" },
     ],
 }
 
