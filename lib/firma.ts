@@ -1,18 +1,29 @@
 // Údaje provozovatele na stránkách Kontakt a Zpracování osobních údajů.
-// TODO před spuštěním: doplnit skutečnou firmu, IČO, spisovou značku, telefony a e-maily
-// (v návrhu ve Figmě jsou také jen zástupné hodnoty, viz poznámka 190:1871).
+// Ověřeno 25. 11. 2026: kontakty a hodiny toyota-jihlava.cz/kontakt, IČO a spisová značka ARES,
+// poloha z adresáře poboček toyotavysocina.cz. emailGdpr je obecný e-mail, zvláštní adresa není známá.
 export const FIRMA = {
     znacka: "Toyota Vysočina.cz",
-    obchodniFirma: "[Obchodní firma s.r.o.]",
-    ico: "[00000000]",
-    rejstrik: "zapsaná v obchodním rejstříku vedeném Krajským soudem v Brně, oddíl C, vložka [00000]",
+    obchodniFirma: "T Vysočina s.r.o.",
+    ico: "05369444",
+    dic: "CZ05369444",
+    rejstrik: "zapsaná v obchodním rejstříku vedeném Krajským soudem v Brně, oddíl C, vložka 99760",
     ulice: "Rantířovská 4844/6",
     mesto: "586 01 Jihlava",
-    telefonProdej: "+420 000 000 000",
-    telefonServis: "+420 000 000 000",
-    email: "info@toyota-vysocina.cz",
-    emailGdpr: "gdpr@toyota-vysocina.cz",
-    // otevírací doba: text na Kontaktu i openingHoursSpecification v JSON-LD (lib/seo.ts)
+    telefonProdej: "+420 565 552 301",
+    telefonServis: "+420 565 552 302",
+    email: "info@toyotavysocina.cz",
+    emailGdpr: "info@toyotavysocina.cz",
+    geo: { latitude: 49.396283, longitude: 15.564756 },
+    // ostatní profily téže pobočky, schema.org sameAs (Firmy.cz na ně odkazuje)
+    profily: [
+        "https://www.toyota-jihlava.cz/",
+        "https://www.firmy.cz/detail/13053068-t-vysocina-s-r-o-jihlava.html",
+        "https://www.facebook.com/toyotavysocinacz",
+        "https://www.instagram.com/toyotavysocina",
+        "https://www.linkedin.com/company/toyota-vysocina",
+        "https://www.youtube.com/@ToyotaVysocina",
+    ],
+    // otevírací doba prodeje: text na Kontaktu i openingHoursSpecification v JSON-LD (lib/seo.ts)
     hodiny: [
         { dny: "Po–Pá", schema: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], od: "08:00", do: "17:00" },
         { dny: "So", schema: ["Saturday"], od: "09:00", do: "12:00" },

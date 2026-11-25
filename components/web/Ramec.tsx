@@ -6,6 +6,7 @@ import { ADRESA, FIRMA } from "@/lib/firma"
 
 const ODKAZY = [
     { href: "/", text: "Showroom" },
+    { href: "/modely", text: "Modely a ceny" },
     { href: "/kontakt", text: "Kontakt" },
 ]
 
@@ -42,6 +43,9 @@ export function Ramec({ aktivni, children }: { aktivni?: string; children: React
                     <p className="text-[15px] text-on-ink-2">{ADRESA}</p>
                 </div>
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-8">
+                    <Link href="/modely" className="font-mono text-[13px] uppercase hover:underline">
+                        Modely a ceny
+                    </Link>
                     <Link href="/kontakt" className="font-mono text-[13px] uppercase hover:underline">
                         Kontakt
                     </Link>

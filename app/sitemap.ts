@@ -1,12 +1,16 @@
 import type { MetadataRoute } from "next"
 
+import { cestaModelu } from "@/lib/modely"
 import { url } from "@/lib/seo"
+import { nactiModely } from "@/sanity/lib/nabidka"
 
-// Web má zatím tři stránky; nabídka vozů žije v panelu na úvodní stránce (bez vlastních URL)
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    const modely = await nactiModely()
     return [
-        { url: url("/"), changeFrequency: "weekly", priority: 1 },
-        { url: url("/kontakt"), changeFrequency: "yearly", priority: 0.8 },
-        { url: url("/zpracovani-osobnich-udaju"), changeFrequency: "yearly", priority: 0.3 },
+        { url: url("/") },
+        { url: url("/modely") },
+        ...modely.map((m) => ({ url: url(cestaModelu(m.slug)) })),
+        { url: url("/kontakt") },
+        { url: url("/zpracovani-osobnich-udaju") },
     ]
 }

@@ -37,3 +37,16 @@ export async function nactiFotky(slug: string, variantaKey: string) {
     cacheTag(TAG_NABIDKA)
     return client.fetch(VARIANTA_FOTKY_QUERY, { slug, variantaKey })
 }
+
+// Modely s aspoň jedním vozem a jejich vozy (stránky /modely, sitemapa, llms.txt)
+export async function nactiModely() {
+    const { vozy } = await nactiNabidku()
+    const modely = new Map<string, { nazev: string; slug: string; vozy: typeof vozy }>()
+    for (const v of vozy) {
+        const m = modely.get(v.model.slug) ?? { nazev: v.model.nazev, slug: v.model.slug, vozy: [] }
+        m.vozy.push(v)
+        modely.set(m.slug, m)
+    }
+    return [...modely.values()].sort((a, b) => a.nazev.localeCompare(b.nazev, "cs"))
+}
+export type ModelSVozy = Awaited<ReturnType<typeof nactiModely>>[number]

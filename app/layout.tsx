@@ -3,7 +3,7 @@ import { Atkinson_Hyperlegible_Next, Geist, Geist_Mono, Zalando_Sans_Expanded } 
 import { Toaster } from "react-hot-toast";
 import JsonLd from "@/components/web/JsonLd";
 import { FIRMA } from "@/lib/firma";
-import { firmaLd, NAZEV_WEBU, OG_OBRAZEK, OG_WEBU, POPIS_WEBU, SITE_URL, TITULEK_WEBU, webLd } from "@/lib/seo";
+import { firmaLd, INDEXOVAT, NAZEV_WEBU, OG_OBRAZEK, OG_WEBU, POPIS_WEBU, SITE_URL, TITULEK_WEBU, webLd } from "@/lib/seo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,7 +13,7 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
 // DESIGN.md: Zalando Sans Expanded na nadpisy, Atkinson Hyperlegible Next na čtený text
@@ -64,7 +64,10 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false, email: false, address: false },
   // ikony z public/ (ne file convention v app/: ta u catch-all /studio blokuje prerender metadat)
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
     apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
   },
   appleWebApp: { title: FIRMA.znacka, statusBarStyle: "black-translucent" },
@@ -78,9 +81,9 @@ export const metadata: Metadata = {
     images: [OG_OBRAZEK.url],
   },
   robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+    index: INDEXOVAT,
+    follow: INDEXOVAT,
+    googleBot: { index: INDEXOVAT, follow: INDEXOVAT, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
   },
 };
 

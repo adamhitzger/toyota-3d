@@ -1,10 +1,12 @@
 import type { Metadata } from "next"
 
-import { FIRMA } from "@/lib/firma"
+import { FIRMA, MAPA_NAVIGACE } from "@/lib/firma"
 
-// Veřejná adresa webu (canonical, OG, sitemap, JSON-LD). Na hostingu nastavit NEXT_PUBLIC_SITE_URL,
-// výchozí hodnota je předpokládaná doména podle e-mailů v lib/firma.ts.
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.toyota-vysocina.cz").replace(/\/$/, "")
+// Veřejná adresa webu (canonical, OG, sitemap, JSON-LD). Na ostré doméně nastavit NEXT_PUBLIC_SITE_URL,
+// do té doby platí adresa z Vercelu a web je noindex (demo se nemá plést s ostrým webem prodejce).
+const VERCEL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || (VERCEL ? `https://${VERCEL}` : "http://localhost:3000")).replace(/\/$/, "")
+export const INDEXOVAT = /^https:/.test(SITE_URL) && !new URL(SITE_URL).hostname.endsWith(".vercel.app")
 export const NAZEV_WEBU = `${FIRMA.znacka} · 3D showroom`
 export const POPIS_WEBU =
     "Projděte si showroom Toyota Vysočina.cz v Jihlavě online: nové, skladové i předváděcí vozy Toyota s cenami a poptávkou na jedno kliknutí."
@@ -28,7 +30,17 @@ export const OG_WEBU = {
 export const url = (cesta: string) => `${SITE_URL}${cesta === "/" ? "" : cesta}`
 
 // Metadata podstránky: titulek, popis, canonical, OG a Twitter se stejným textem
-export function pageSeo({ title, description, path }: { title: string; description: string; path: string }): Metadata {
+export function pageSeo({
+    title,
+    description,
+    path,
+    obrazek = OG_OBRAZEK,
+}: {
+    title: string
+    description: string
+    path: string
+    obrazek?: typeof OG_OBRAZEK
+}): Metadata {
     // title.template z layoutu se na OG/Twitter nepropisuje → celý titulek ručně
     const cely = `${title} · ${FIRMA.znacka}`
     return {
@@ -42,9 +54,9 @@ export function pageSeo({ title, description, path }: { title: string; descripti
             url: path,
             title: cely,
             description,
-            images: [OG_OBRAZEK],
+            images: [obrazek],
         },
-        twitter: { card: "summary_large_image", title: cely, description, images: [OG_OBRAZEK.url] },
+        twitter: { card: "summary_large_image", title: cely, description, images: [obrazek.url] },
     }
 }
 
@@ -61,6 +73,14 @@ export const firmaLd = {
     "@id": ID.firma,
     name: FIRMA.znacka,
     legalName: FIRMA.obchodniFirma,
+    taxID: FIRMA.ico,
+    vatID: FIRMA.dic,
+    description: POPIS_WEBU,
+    geo: { "@type": "GeoCoordinates", ...FIRMA.geo },
+    hasMap: MAPA_NAVIGACE,
+    sameAs: FIRMA.profily,
+    areaServed: { "@type": "AdministrativeArea", name: "Kraj Vysočina" },
+    currenciesAccepted: "CZK",
     url: SITE_URL,
     logo: `${SITE_URL}/icon-512.png`,
     image: `${SITE_URL}${OG_OBRAZEK.url}`,
@@ -97,10 +117,10 @@ export const webLd = {
     publisher: { "@id": ID.firma },
 }
 
-type Stranka = { typ?: string; cesta: string; nazev: string; popis: string; drobecky?: boolean }
+type Stranka = { typ?: string; cesta: string; nazev: string; popis: string; drobecky?: boolean; nadrazena?: { nazev: string; cesta: string } }
 
 // WebPage (+ BreadcrumbList u podstránek) navázaná na web a firmu
-export function strankaLd({ typ = "WebPage", cesta, nazev, popis, drobecky = true }: Stranka) {
+export function strankaLd({ typ = "WebPage", cesta, nazev, popis, drobecky = true, nadrazena }: Stranka) {
     const uzly: Record<string, unknown>[] = [
         {
             "@type": typ,
@@ -121,7 +141,8 @@ export function strankaLd({ typ = "WebPage", cesta, nazev, popis, drobecky = tru
             "@id": `${url(cesta)}#drobecky`,
             itemListElement: [
                 { "@type": "ListItem", position: 1, name: "Showroom", item: SITE_URL },
-                { "@type": "ListItem", position: 2, name: nazev, item: url(cesta) },
+                ...(nadrazena ? [{ "@type": "ListItem", position: 2, name: nadrazena.nazev, item: url(nadrazena.cesta) }] : []),
+                { "@type": "ListItem", position: nadrazena ? 3 : 2, name: nazev, item: url(cesta) },
             ],
         })
     return uzly

@@ -7,6 +7,5 @@ export default function robots(): MetadataRoute.Robots {
         // Sanity Studio a API (formuláře, revalidace) do vyhledávání nepatří
         rules: { userAgent: "*", allow: "/", disallow: ["/studio", "/api/"] },
         sitemap: `${SITE_URL}/sitemap.xml`,
-        host: SITE_URL,
     }
 }

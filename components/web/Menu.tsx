@@ -9,6 +9,7 @@ import { ADRESA, FIRMA } from "@/lib/firma"
 
 const ODKAZY = [
     { href: "/", text: "Showroom" },
+    { href: "/modely", text: "Modely a ceny" },
     { href: "/kontakt", text: "Kontakt" },
     { href: "/zpracovani-osobnich-udaju", text: "Zpracování osobních údajů" },
 ]
