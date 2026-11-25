@@ -7,7 +7,7 @@ type Verze = NonNullable<VUZ_QUERY_RESULT>["verzeModelu"][number]
 const mono = "font-mono uppercase tracking-[0.06em]"
 
 // Lišta pod autem na koberci (Figma 122:719): zpět na modely, verze, barva, otočení, poptávka,
-// zpět na nabídku. Desktop = jeden řádek, mobil = tři řádky pod sebou a otáčí se jen tažením.
+// zpět na nabídku. Desktop = jeden řádek, tablet = dva, mobil = tři řádky pod sebou a otáčí se jen tažením.
 export default function OvladaniVozu({
     varianty,
     barva,
@@ -32,7 +32,7 @@ export default function OvladaniVozu({
     onNabidka: () => void
 }) {
     const vyberVerze = (vyska: string, roztahnout: boolean) => (
-        <div role="radiogroup" aria-label="Verze" className={`flex ${roztahnout ? "w-full" : "border border-ink"}`}>
+        <div role="radiogroup" aria-label="Verze" className={`flex ${roztahnout ? "h-full w-full" : "border border-ink"}`}>
             {verze.map((v, i) => {
                 const aktivni = v.slug === slug
                 return (
@@ -41,7 +41,7 @@ export default function OvladaniVozu({
                         role="radio"
                         aria-checked={aktivni}
                         onClick={() => onVerze(v.slug)}
-                        className={`relative flex ${vyska} items-center justify-center px-3.5 text-xs ${mono} ${roztahnout ? "flex-1" : ""} ${i > 0 ? "border-l border-ink" : ""} ${aktivni ? "bg-ink text-on-ink" : "bg-panel text-ink hover:bg-paper-2"}`}
+                        className={`relative flex ${vyska} items-center justify-center text-xs ${mono} ${roztahnout ? "flex-auto px-1 max-[400px]:text-[11px] max-[400px]:tracking-normal" : "px-3.5"} ${i > 0 ? "border-l border-ink" : ""} ${aktivni ? "bg-ink text-on-ink" : "bg-panel text-ink hover:bg-paper-2"}`}
                     >
                         {v.verze ?? v.nazev}
                         {aktivni && <span className="absolute inset-x-0 bottom-0 h-[3px] bg-red" />}
@@ -54,8 +54,8 @@ export default function OvladaniVozu({
     const vyberBarvy = (vzorek: string) => (
         <>
             <div className="flex shrink-0 flex-col gap-0.5">
-                <span className={`text-[10px] text-ink-2 lg:text-[11px] ${mono}`}>Barva</span>
-                <span className="font-body text-[13px] font-bold text-ink lg:text-sm">{barva?.nazevBarvy}</span>
+                <span className={`text-[10px] text-ink-2 xl:text-[11px] ${mono}`}>Barva</span>
+                <span className="font-body text-[13px] font-bold text-ink xl:text-sm">{barva?.nazevBarvy}</span>
             </div>
             <div role="radiogroup" aria-label="Barva" className="flex flex-wrap items-center gap-2">
                 {varianty.map((v) => {
@@ -82,7 +82,7 @@ export default function OvladaniVozu({
     return (
         <div className="pointer-events-auto border border-ink bg-panel text-ink">
             {/* desktop */}
-            <div className="hidden items-stretch whitespace-nowrap lg:flex [&>*]:shrink-0">
+            <div className="hidden items-stretch whitespace-nowrap xl:flex [&>*]:shrink-0">
                 <button onClick={onModely} className={`flex h-16 items-center px-4 text-[13px] hover:bg-paper-2 ${mono}`}>
                     ← Modely
                 </button>
@@ -108,9 +108,11 @@ export default function OvladaniVozu({
             </div>
 
             {/* mobil */}
-            <div className="flex flex-col whitespace-nowrap lg:hidden">
-                <div className="flex items-center gap-3 px-3.5 pb-2.5 pt-3">{vyberBarvy("size-5")}</div>
-                {verze.length > 1 && <div className="border-t border-ink">{vyberVerze("h-10", true)}</div>}
+            <div className="flex flex-col whitespace-nowrap xl:hidden">
+                <div className="flex flex-col md:flex-row">
+                    <div className="flex items-center gap-3 px-3.5 pb-2.5 pt-3 md:py-2">{vyberBarvy("size-5")}</div>
+                    {verze.length > 1 && <div className="border-t border-ink md:flex-1 md:border-l md:border-t-0">{vyberVerze("h-10 md:h-full", true)}</div>}
+                </div>
                 <div className="flex border-t border-ink">
                     <button onClick={onModely} className={`flex h-12 items-center px-3.5 text-xs ${mono}`}>
                         ← Modely

@@ -8,11 +8,18 @@ import { MODELY_QUERY, VARIANTA_FOTKY_QUERY, VOZY_QUERY, VUZ_QUERY } from "./que
 // ze Sanity (app/api/revalidate) → při běžném provozu se do Sanity skoro nechodí.
 export const TAG_NABIDKA = "nabidka"
 
+// Na localhost se webhook nedostane → při vývoji se data po chvíli načtou znovu sama.
+// (expire musí být aspoň 5 minut, jinak by Next data bral jako dynamická)
+function platnost() {
+    if (process.env.NODE_ENV === "development") cacheLife({ stale: 30, revalidate: 10, expire: 3600 })
+    else cacheLife("max")
+}
+
 // Celá nabídka pro panel „Nabídka vozů“: mřížky modelů pro všechny tři kategorie a karty vozů
 // (verze modelu se z nich filtrují na klientu). Dat je málo, takže jdou se stránkou najednou.
 export async function nactiNabidku() {
     "use cache"
-    cacheLife("max")
+    platnost()
     cacheTag(TAG_NABIDKA)
     const [modely, skladove, predvadeci, vozy] = await Promise.all([
         client.fetch(MODELY_QUERY, { kategorie: "modely" }),
@@ -26,14 +33,14 @@ export type Nabidka = Awaited<ReturnType<typeof nactiNabidku>>
 
 export async function nactiVuz(slug: string) {
     "use cache"
-    cacheLife("max")
+    platnost()
     cacheTag(TAG_NABIDKA)
     return client.fetch(VUZ_QUERY, { slug })
 }
 
 export async function nactiFotky(slug: string, variantaKey: string) {
     "use cache"
-    cacheLife("max")
+    platnost()
     cacheTag(TAG_NABIDKA)
     return client.fetch(VARIANTA_FOTKY_QUERY, { slug, variantaKey })
 }

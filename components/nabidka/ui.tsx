@@ -40,6 +40,43 @@ export function Tlacitko({ children, className = "", ...props }: ButtonHTMLAttri
     )
 }
 
+// Vzhled tlačítka „Inkoust“ uvnitř karty, která je klikací celá (button v buttonu být nesmí); hover řídí group karty
+export function TlacitkoVzhled({ children, className = "" }: { children: ReactNode; className?: string }) {
+    return (
+        <span
+            aria-hidden
+            className={`flex h-14 w-full items-center justify-between bg-ink pl-6 pr-1.5 font-mono text-[15px] leading-[1.2] tracking-[0.08em] text-on-ink ${className}`}
+        >
+            {children}
+            <span className="flex size-11 items-center justify-center bg-red transition-transform duration-300 ease-expo group-hover:translate-x-0.5">
+                <Image src="/ikony/arrow-right.svg" alt="" width={20} height={20} />
+            </span>
+        </span>
+    )
+}
+
+// Tlačítko zpět nad nadpisem: obrys jako Zavrit, šipka v červeném čtverci vlevo
+export function TlacitkoZpet({ children, className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) {
+    return (
+        <button {...props} className={`group ${zpet} ${className}`}>
+            <ZpetObsah>{children}</ZpetObsah>
+        </button>
+    )
+}
+
+export const zpet = "flex h-11 w-fit items-center gap-3 border border-ink bg-panel pr-4 font-mono text-[13px] uppercase tracking-[0.06em] text-ink hover:bg-paper-2"
+
+export function ZpetObsah({ children }: { children: ReactNode }) {
+    return (
+        <>
+            <span aria-hidden className="flex h-full w-11 items-center justify-center bg-red text-base text-on-ink">
+                <span className="transition-transform duration-300 ease-expo group-hover:-translate-x-0.5">←</span>
+            </span>
+            {children}
+        </>
+    )
+}
+
 // Čtverec se šipkou na kartách (36 px, inkoust)
 export function Sipka({ className = "" }: { className?: string }) {
     return (

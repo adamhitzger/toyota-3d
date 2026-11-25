@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 
 import { cena, nazevKategorie, pohon, type TypMotoru } from "@/components/nabidka/texty"
 import { Vzorky } from "@/components/nabidka/SeznamVozu"
-import { Foto } from "@/components/nabidka/ui"
+import { Foto, ZpetObsah, zpet } from "@/components/nabidka/ui"
 import JsonLd from "@/components/web/JsonLd"
 import { Nadpis, Ramec } from "@/components/web/Ramec"
 import { cenaOd, cestaModelu, faqLd, fotkaModelu, modelLd, otazkyModelu, pohonyModelu, popisModelu } from "@/lib/modely"
@@ -50,8 +50,8 @@ export default async function Page({ params }: Props) {
             />
             <div className="flex flex-col gap-9 px-4 pb-10 pt-7 md:gap-16 md:px-16 md:pb-24 md:pt-[72px]">
                 <div className="flex flex-col gap-4 md:gap-6">
-                    <Link href="/modely" className="w-fit font-mono text-[13px] uppercase text-ink-2 hover:text-ink">
-                        ← Modely a ceny
+                    <Link href="/modely" className={`group ${zpet}`}>
+                        <ZpetObsah>Modely a ceny</ZpetObsah>
                     </Link>
                     <Nadpis stitek={pohonyModelu(m)} className="text-[44px] md:text-[72px]">
                         Toyota {m.nazev}

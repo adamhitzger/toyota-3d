@@ -4,12 +4,14 @@ import { useLenis } from "lenis/react"
 import { useEffect, useRef, useState } from "react"
 
 import CarViewer, { type CarViewerHandle, type Geometrie, type Varianta } from "@/components/CarViewer"
+import { konecPruletu } from "@/components/ScrollVideo"
 import type { VUZ_QUERY_RESULT } from "@/sanity.types"
 import type { Nabidka as Data } from "@/sanity/lib/nabidka"
 
 import OvladaniVozu from "./OvladaniVozu"
 import PanelNabidka from "./PanelNabidka"
 import Poptavka from "./Poptavka"
+import Pruvodkyne from "./Pruvodkyne"
 import SeznamVozu from "./SeznamVozu"
 import { cena, pohon, type Kategorie } from "./texty"
 import { Stitek, Zavrit } from "./ui"
@@ -95,10 +97,28 @@ export default function Nabidka({ data }: { data: Data }) {
         return () => window.removeEventListener("keydown", onKey)
     }, [poptavka, seznam])
 
+    // Návrat průletem zpět pod polovinu: příští příjezd začíná zase úvodní nabídkou vozů
+    const vybrano = slug !== null || modelId !== null || kategorie !== "modely"
+    useEffect(() => {
+        if (!vybrano) return
+        const onScroll = () => {
+            if (window.scrollY >= konecPruletu() / 2) return
+            setSlug(null)
+            setBarvaKey(undefined)
+            setModelId(null)
+            setKategorie("modely")
+            setSeznam(false)
+            setPoptavka(false)
+        }
+        window.addEventListener("scroll", onScroll, { passive: true })
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [vybrano])
+
     const autoVidet = !!karta && !seznam
     const panelVidet = !slug
 
     return (
+        <>
         <div data-reveal className="invisible absolute inset-0">
             {/* auto na koberci */}
             {karta && barva && (
@@ -113,26 +133,39 @@ export default function Nabidka({ data }: { data: Data }) {
                 </div>
             )}
 
-            {/* název vozu (Figma 122:721 / 122:773) */}
+            {/* název vozu na mobilu; od md je u lišty pod autem, aby nekryl banner prodejny ve videu */}
             {karta && (
                 <div
                     inert={!autoVidet}
-                    className={`absolute left-4 top-[72px] flex flex-col gap-0.5 border border-ink bg-panel px-3.5 py-3 md:left-16 md:top-14 md:gap-1.5 md:border-0 md:bg-transparent md:p-0 ${prechod} ${autoVidet ? "" : "invisible -translate-y-4 opacity-0"}`}
+                    className={`absolute left-4 top-[72px] flex max-w-[calc(100%-32px)] flex-col gap-0.5 border border-ink bg-panel px-3.5 py-3 md:hidden ${prechod} ${autoVidet ? "" : "invisible -translate-y-4 opacity-0"}`}
                 >
                     <Stitek>
                         [ {karta.model.nazev} · {pohon(karta.typMotoru)} ]
                     </Stitek>
-                    <h2 className="font-display text-[32px] font-black uppercase leading-[0.95] tracking-[-0.035em] text-ink md:text-[56px]">{karta.nazev}</h2>
-                    <p className="font-body text-[15px] font-bold text-ink md:text-xl">od {cena(karta.cenaOd)}</p>
+                    <h2 className="font-display text-[32px] font-black uppercase leading-[0.95] tracking-[-0.035em] text-ink">{karta.nazev}</h2>
+                    <p className="font-body text-[15px] font-bold text-ink">od {cena(karta.cenaOd)}</p>
                 </div>
             )}
 
             {/* ovládání vozu (Figma 122:719) */}
             {karta && (
                 <div
+                    data-lista
                     inert={!autoVidet}
-                    className={`absolute inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] lg:inset-x-auto lg:bottom-6 lg:left-1/2 lg:w-max lg:max-w-[calc(100vw-48px)] lg:-translate-x-1/2 ${prechod} ${autoVidet ? "" : "invisible translate-y-6 opacity-0"}`}
+                    className={`absolute inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] xl:inset-x-auto xl:bottom-6 xl:left-1/2 xl:w-max xl:max-w-[calc(100vw-48px)] xl:-translate-x-1/2 ${prechod} ${autoVidet ? "" : "invisible translate-y-6 opacity-0"}`}
                 >
+                    <div className="pointer-events-auto hidden items-end justify-between gap-6 border border-b-0 border-ink bg-panel px-3.5 py-3 md:flex xl:gap-10 xl:px-5 xl:py-4 [@media(max-height:500px)]:py-2">
+                        <div className="flex min-w-0 flex-col gap-1.5">
+                            <Stitek className="[@media(max-height:500px)]:hidden">
+                                [ {karta.model.nazev} · {pohon(karta.typMotoru)} ]
+                            </Stitek>
+                            <h2 className="font-display text-[26px] font-black uppercase leading-[0.95] tracking-[-0.035em] text-ink xl:text-[48px]">{karta.nazev}</h2>
+                        </div>
+                        <p className="flex shrink-0 flex-col gap-1.5">
+                            <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-ink-2 xl:text-[13px] [@media(max-height:500px)]:hidden">Cena od</span>
+                            <span className="font-display text-[22px] font-black leading-[0.95] tracking-[-0.02em] text-ink xl:text-[38px]">{cena(karta.cenaOd)}</span>
+                        </p>
+                    </div>
                     <OvladaniVozu
                         varianty={varianty}
                         barva={barva}
@@ -210,5 +243,7 @@ export default function Nabidka({ data }: { data: Data }) {
                 )}
             </div>
         </div>
+        <Pruvodkyne scena={poptavka ? 6 : seznam ? (modelId ? 4 : 3) : slug ? 5 : 2} />
+        </>
     )
 }

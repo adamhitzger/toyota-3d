@@ -115,7 +115,7 @@ export default function Poptavka({
                             {/* shrnutí vozu */}
                             <section className="flex flex-col gap-3.5 md:gap-5">
                                 <Stitek>[ Poptávka ]</Stitek>
-                                <h2 id={`${id}-nadpis`} className="hidden font-display text-[72px] font-black uppercase leading-[0.9] tracking-[-0.035em] text-ink md:block">
+                                <h2 id={`${id}-nadpis`} className="hidden font-display text-[40px] font-black uppercase leading-[0.9] xl:text-[72px] tracking-[-0.035em] text-ink md:block">
                                     Vaše {vybrany.nazev}
                                 </h2>
                                 <div className="flex items-center gap-3 md:block">
