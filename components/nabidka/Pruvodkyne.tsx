@@ -16,7 +16,7 @@ const KLIPY: Record<Scena, Klip> = {
     3: { soubor: "3", veta: 1.79, radky: ["Vyberte si model,", "třeba RAV4."], strana: "vpravo" },
     4: { soubor: "4", veta: 1.54, radky: ["Teď už jen zvolit verzi."], strana: "vpravo" },
     5: { soubor: "5", veta: 2.25, radky: ["Krásná volba!", "Stačí ji poptat."], strana: "vpravo" },
-    6: { soubor: "6", veta: 1.83, radky: ["Vyplňte kontakt", "a já se vám ozvu."], strana: "stred" },
+    6: { soubor: "6", veta: 2.83, radky: ["Vyplňte kontakt", "a já se vám ozvu."], strana: "stred" },
 }
 // na mobilu je nabídka dole, ne vpravo
 const KLIP_2_MOBIL: Klip = { soubor: "2m", veta: 1.92, radky: ["Najdete tu celou", "nabídku našich vozů."], strana: "vlevo" }
@@ -40,11 +40,12 @@ const zapis = (k: string, v: boolean) => {
     } catch {}
 }
 
-export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 1> }) {
+export default function Pruvodkyne({ scena: zNabidky, onPobidka }: { scena: Exclude<Scena, 1>; onPobidka: (ano: boolean) => void }) {
     const [oblast, setOblast] = useState<"uvod" | "prulet" | "nabidka">("uvod")
     const [postava, setPostava] = useState<boolean | null>(null)
     const [skryta, setSkryta] = useState(true)
     const [zvuk, setZvuk] = useState(false)
+    const [blokovan, setBlokovan] = useState(false)
     const [klid, setKlid] = useState(false)
     const [hraje, setHraje] = useState<Scena | null>(null)
     const [viditelna, setViditelna] = useState(false)
@@ -54,7 +55,8 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
     const obal = useRef<HTMLDivElement>(null)
     const canvas = useRef<HTMLCanvasElement>(null)
     const video = useRef<HTMLVideoElement>(null)
-    const rekla = useRef(new Set<Scena>())
+    // přivítání jen jednou za průjezd; scény nabídky mluví při každém návratu (zpět na modely, jiný vůz)
+    const privitala = useRef(false)
     const zvukRef = useRef(false)
 
     useEffect(() => {
@@ -78,6 +80,8 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
     useEffect(() => {
         const onScroll = () => {
             const p = window.scrollY / Math.max(konecPruletu(), 1)
+            // návrat na začátek: přivítá znovu
+            if (p < 0.08) privitala.current = false
             setOblast(p < 0.08 ? "uvod" : p < 0.7 ? "prulet" : "nabidka")
         }
         onScroll()
@@ -89,13 +93,17 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
     const aktivni = !skryta && postava !== null
     const klip = hraje === 2 && !postava ? KLIP_2_MOBIL : hraje ? KLIPY[hraje] : null
 
+    // Po větě „Stačí ji poptat.“ se rozzáří tlačítko Poptat (u skryté Petry hned po výběru vozu)
+    const pobidka = scena === 5 && (skryta || (hraje === 5 && !mluvi))
+    useEffect(() => onPobidka(pobidka), [onPobidka, pobidka])
+
     // Přechod na novou scénu. Přivítání se nechá dopovědět, i když průlet mezitím dojel k nabídce.
     useEffect(() => {
         if (!aktivni || scena === hraje) return
         if (hraje === 1 && scena === 2 && mluvi) return
         const t = setTimeout(
             () => {
-                if (scena === null || rekla.current.has(scena)) {
+                if (scena === null || (scena === 1 && privitala.current)) {
                     setViditelna(false)
                     setMluvi(false)
                     setHraje(scena)
@@ -104,7 +112,7 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
                 const cil = scena === 5 ? "[data-lista]" : scena === 2 && !postava ? "[data-reveal-panel]" : null
                 const el = cil ? document.querySelector<HTMLElement>(cil) : null
                 setDole(el && obal.current ? obal.current.offsetHeight - el.offsetTop : 0)
-                rekla.current.add(scena)
+                if (scena === 1) privitala.current = true
                 setHraje(scena)
                 setViditelna(true)
                 setMluvi(true)
@@ -117,7 +125,9 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
         // eslint-disable-next-line react-hooks/exhaustive-deps -- viditelna jen schová předchozí scénu
     }, [aktivni, scena, hraje, mluvi, postava])
 
-    // Přehrání klipu a průhlednost
+    // Přehrání klipu a průhlednost. Konec věty se řídí časem videa, ne hodinami: pomalé načtení
+    // ani zopakování po zapnutí hlasu ji nesmí useknout.
+    const zustane = hraje === 2 && !!postava
     useEffect(() => {
         const v = video.current
         const c = canvas.current
@@ -125,10 +135,15 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
         const kresli = pripravGl(c)
         let snimek = 0
         let konec = false
+        let dorekla = 0
         const smycka = () => {
             if (konec) return
             if (v.readyState >= 2) {
                 kresli?.(v)
+                if (v.currentTime < klip.veta) dorekla = 0
+                else if (!dorekla) dorekla = performance.now()
+                else if (performance.now() - dorekla > 300) setMluvi(false)
+                if (dorekla && !zustane && performance.now() - dorekla > DOZNENI * 1000) setViditelna(false)
                 // klidová smyčka za větou
                 if (v.duration && v.currentTime > v.duration - 0.06) v.currentTime = klip.veta + 0.5
             }
@@ -136,52 +151,89 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
         }
         v.src = `/video/petra/${klip.soubor}.mp4`
         v.muted = !zvukRef.current
-        const hrej = () =>
-            v.play().catch(() => {
+        v.onerror = () => setBezVidea(true)
+        v.play().then(
+            () => !konec && setBlokovan(false),
+            () => {
                 if (konec) return
                 // zvuk bez kliknutí prohlížeč nepustí → potichu; v úsporném režimu jen fotka
+                if (!v.muted) setBlokovan(true)
                 v.muted = true
                 return v.play().catch(() => !konec && setBezVidea(true))
-            })
-        hrej()
+            },
+        )
         smycka()
         return () => {
             konec = true
             cancelAnimationFrame(snimek)
+            v.onerror = null
             v.pause()
         }
-    }, [klip, viditelna, klid])
+    }, [klip, viditelna, klid, zustane])
 
-    // Konec věty a odchod
+    // Bez videa (fotka) řídí odchod časovač
     useEffect(() => {
-        if (!klip || !viditelna) return
+        if (!klip || !viditelna || !(klid || bezVidea)) return
         const t1 = setTimeout(() => setMluvi(false), klip.veta * 1000 + 300)
-        const zustane = hraje === 2 && postava
         const t2 = zustane ? undefined : setTimeout(() => setViditelna(false), (klip.veta + DOZNENI) * 1000)
         return () => {
             clearTimeout(t1)
             clearTimeout(t2)
         }
-    }, [klip, viditelna, hraje, postava])
+    }, [klip, viditelna, klid, bezVidea, zustane])
 
+    // Zapnout zvuk smí jen obsluha kliknutí; větu zopakuje od začátku, ať je slyšet celá
+    const pustNahlas = (odZacatku: boolean) => {
+        const v = video.current
+        if (!v) return
+        v.muted = false
+        setBlokovan(false)
+        if (!viditelna || !klip) return
+        if (odZacatku) {
+            v.currentTime = 0
+            setMluvi(true)
+        }
+        v.play().catch(() => {
+            v.muted = true
+            setBlokovan(true)
+            v.play().catch(() => {})
+        })
+    }
+
+    // Hlas je zapnutý z minula, ale prohlížeč ho po načtení stránky nepustil → první kliknutí kamkoli
+    useEffect(() => {
+        if (!blokovan || !zvuk) return
+        const odblokuj = (e: Event) => {
+            if ((e.target as Element | null)?.closest?.("[data-petra]")) return
+            pustNahlas(mluvi)
+        }
+        window.addEventListener("click", odblokuj)
+        window.addEventListener("keydown", odblokuj)
+        return () => {
+            window.removeEventListener("click", odblokuj)
+            window.removeEventListener("keydown", odblokuj)
+        }
+    })
+
+    const hlas = zvuk && !blokovan
     const prepniZvuk = () => {
-        const novy = !zvuk
+        const novy = !hlas
         setZvuk(novy)
         zvukRef.current = novy
         zapis(ULOZIT.zvuk, novy)
-        const v = video.current
-        if (!v) return
-        v.muted = !novy
-        if (novy && klip) {
-            // větu zopakovat od začátku, ať ji návštěvník slyší celou
-            v.currentTime = 0
-            v.play().catch(() => {})
-        }
+        if (novy) pustNahlas(true)
+        else if (video.current) video.current.muted = true
     }
     const schovej = () => {
         setViditelna(false)
         setSkryta(true)
+        setHraje(null)
         zapis(ULOZIT.skryta, true)
+    }
+    // zavřenou Petru jde vrátit; promluví aktuální scénu
+    const ukaz = () => {
+        setSkryta(false)
+        zapis(ULOZIT.skryta, false)
     }
 
     const strana = klip?.strana ?? "vlevo"
@@ -195,7 +247,7 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
         </>
     )
     const bublina = klip && (
-        <div className={`pointer-events-auto relative w-max rounded-[18px] bg-white text-ink shadow-[0_12px_32px_rgb(0_0_0/0.22)] ${postava ? "px-5 py-3.5" : "py-3 pl-10 pr-4"}`}>
+        <div data-petra className={`pointer-events-auto relative w-max rounded-[18px] bg-white text-ink shadow-[0_12px_32px_rgb(0_0_0/0.22)] ${postava ? "px-5 py-3.5" : "py-3 pl-10 pr-4"}`}>
             <p className="flex items-center gap-1.5 pr-16 font-mono text-[11px] uppercase tracking-[0.06em] text-ink-2">
                 <span aria-hidden className="size-2 rounded-full bg-red" />
                 Petra · průvodkyně
@@ -208,8 +260,8 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
                 ))}
             </p>
             <div className="absolute right-1 top-0.5 flex">
-                <button onClick={prepniZvuk} aria-pressed={zvuk} aria-label={zvuk ? "Vypnout hlas Petry" : "Zapnout hlas Petry"} className="flex size-9 items-center justify-center text-ink-2 hover:text-ink">
-                    <IkonaZvuku zapnuto={zvuk} />
+                <button onClick={prepniZvuk} aria-pressed={hlas} aria-label={hlas ? "Vypnout hlas Petry" : "Zapnout hlas Petry"} className="flex size-9 items-center justify-center text-ink-2 hover:text-ink">
+                    <IkonaZvuku zapnuto={hlas} />
                 </button>
                 <button onClick={schovej} aria-label="Skrýt průvodkyni" className="flex size-9 items-center justify-center font-mono text-lg text-ink-2 hover:text-ink">
                     ×
@@ -244,6 +296,16 @@ export default function Pruvodkyne({ scena: zNabidky }: { scena: Exclude<Scena, 
                         </div>
                     </div>
                 ))}
+            {skryta && oblast === "nabidka" && (
+                <button
+                    onClick={ukaz}
+                    aria-label="Zobrazit průvodkyni Petru"
+                    className="pointer-events-auto absolute left-4 top-4 size-11 overflow-hidden rounded-full border-2 border-red bg-[radial-gradient(#fff,#d4d4d1)] shadow-[0_6px_14px_rgb(0_0_0/0.25)] transition-transform hover:scale-105"
+                >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- malá statická ikona */}
+                    <img src="/video/petra/petra.webp" alt="" className="absolute -left-[14px] -top-[2px] h-[86px] w-[62px] max-w-none" />
+                </button>
+            )}
             <p aria-live="polite" className="sr-only">
                 {viditelna && klip ? `Petra: ${klip.radky.join(" ")}` : ""}
             </p>

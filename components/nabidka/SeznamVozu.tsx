@@ -4,7 +4,7 @@ import { useState } from "react"
 
 import type { MODELY_QUERY_RESULT, VOZY_QUERY_RESULT } from "@/sanity.types"
 
-import { POHONY, cena, ceniky, nazevKategorie, pohon, pohony, verze, type Kategorie, type TypMotoru } from "./texty"
+import { POHONY, cena, ceniky, nazevKategorie, pohony, pohonyVozu, verze, type Kategorie, type TypMotoru } from "./texty"
 import { Foto, Sipka, Stitek, TlacitkoVzhled, TlacitkoZpet } from "./ui"
 
 type Model = MODELY_QUERY_RESULT[number]
@@ -144,7 +144,7 @@ function VerzeModelu({
                             onClick={() => onVuz(v.slug)}
                             className="group hidden w-full flex-col gap-3.5 border border-ink bg-panel p-6 text-left outline-2 outline-transparent transition-[scale,outline-color] hover:outline-ink active:scale-[0.99] md:flex"
                         >
-                            <span className="w-fit border border-ink px-2 py-1 font-mono text-[11px] uppercase tracking-[0.06em] text-ink">{pohon(v.typMotoru)}</span>
+                            <span className="w-fit border border-ink px-2 py-1 font-mono text-[11px] uppercase tracking-[0.06em] text-ink">{pohony(pohonyVozu(v))}</span>
                             <span className="font-display text-[26px] font-extrabold leading-none tracking-[-0.02em] text-ink">{v.nazev}</span>
                             <Foto foto={v.foto} width={373} alt={v.nazev} className="h-[150px] w-full" />
                             <Vzorky barvy={v.barvy} velikost="size-5" mezera="gap-1.5" />
@@ -161,7 +161,9 @@ function VerzeModelu({
     )
 }
 
-export function Vzorky({ barvy, velikost, mezera }: { barvy: Vuz["barvy"]; velikost: string; mezera: string }) {
+export function Vzorky({ barvy: vsechny, velikost, mezera }: { barvy: Vuz["barvy"]; velikost: string; mezera: string }) {
+    // stejná barva může být ve více variantách (jiný pohon)
+    const barvy = vsechny.filter((b, i) => vsechny.findIndex((x) => x.nazevBarvy === b.nazevBarvy) === i)
     return (
         <span className={`flex flex-wrap items-center ${mezera}`} aria-label={`Barvy: ${barvy.map((b) => b.nazevBarvy).join(", ")}`}>
             {barvy.map((b, i) => (

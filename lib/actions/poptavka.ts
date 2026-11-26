@@ -2,6 +2,7 @@
 
 import { z } from "zod"
 
+import { POHONY } from "@/components/nabidka/texty"
 import { nactiPole } from "@/lib/formdata"
 import { poptavkaSchema, type PoptavkaInputs } from "@/lib/schemas/poptavka"
 import { client } from "@/sanity/lib/client"
@@ -10,7 +11,7 @@ import type { ActionResponse } from "@/types"
 
 type Res = ActionResponse<PoptavkaInputs>
 
-const POLE = ["vuz", "barva", "jmeno", "telefon", "email", "kontakt", "poznamka", "souhlas"] as const
+const POLE = ["vuz", "barva", "pohon", "jmeno", "telefon", "email", "kontakt", "poznamka", "souhlas"] as const
 
 export async function odeslatPoptavku(_prev: Res, formData: FormData): Promise<Res> {
     const raw = nactiPole(formData, POLE)
@@ -30,11 +31,11 @@ export async function odeslatPoptavku(_prev: Res, formData: FormData): Promise<R
         }
     }
 
-    const { vuz: slug, barva: barvaKey, ...data } = parsed.data
+    const { vuz: slug, barva: barvaKey, pohon: typPohonu, ...data } = parsed.data
     try {
-        // vůz a barvu dohledat na serveru podle slugu — klientovi nevěříme ID ani názvy
-        const vuz = await client.fetch<{ _id: string; nazev: string; barva: string | null } | null>(
-            `*[_type == "vuz" && slug.current == $slug][0]{ _id, nazev, "barva": varianty[_key == $barva][0].nazevBarvy }`,
+        // vůz, barvu a pohon dohledat na serveru podle slugu — klientovi nevěříme ID ani názvy
+        const vuz = await client.fetch<{ _id: string; nazev: string; barva: string | null; pohony: string[] } | null>(
+            `*[_type == "vuz" && slug.current == $slug][0]{ _id, nazev, "barva": varianty[_key == $barva][0].nazevBarvy, "pohony": [typMotoru, ...coalesce(varianty[].pohony[].typMotoru, [])] }`,
             { slug, barva: barvaKey },
         )
         if (!vuz) {
@@ -45,6 +46,7 @@ export async function odeslatPoptavku(_prev: Res, formData: FormData): Promise<R
             vuz: { _type: "reference", _ref: vuz._id, _weak: true },
             nazevVozu: vuz.nazev,
             barva: vuz.barva ?? undefined,
+            pohon: POHONY.find((p) => p.value === typPohonu && vuz.pohony.includes(p.value))?.filtr,
             ...data,
             souhlas: true, // schéma pustí jen zaškrtnutý souhlas ("on") → v Sanity boolean
             vytvoreno: new Date().toISOString(),

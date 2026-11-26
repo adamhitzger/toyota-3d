@@ -9,9 +9,9 @@ import { MODELY_QUERY, VARIANTA_FOTKY_QUERY, VOZY_QUERY, VUZ_QUERY } from "./que
 export const TAG_NABIDKA = "nabidka"
 
 // Na localhost se webhook nedostane → při vývoji se data po chvíli načtou znovu sama.
-// (expire musí být aspoň 5 minut, jinak by Next data bral jako dynamická)
+// (expire i stale musí být aspoň 5 minut, jinak by Next data bral jako dynamická a hlásil chybu prerenderu)
 function platnost() {
-    if (process.env.NODE_ENV === "development") cacheLife({ stale: 30, revalidate: 10, expire: 3600 })
+    if (process.env.NODE_ENV === "development") cacheLife({ stale: 300, revalidate: 10, expire: 3600 })
     else cacheLife("max")
 }
 

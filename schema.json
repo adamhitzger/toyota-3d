@@ -194,6 +194,13 @@
         },
         "optional": true
       },
+      "pohon": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "jmeno": {
         "type": "objectAttribute",
         "value": {
@@ -312,6 +319,76 @@
             "name": "color"
           },
           "optional": false
+        },
+        "pohony": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "array",
+            "of": {
+              "type": "object",
+              "attributes": {
+                "typMotoru": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "union",
+                    "of": [
+                      {
+                        "type": "string",
+                        "value": "hybrid"
+                      },
+                      {
+                        "type": "string",
+                        "value": "plugin-hybrid"
+                      },
+                      {
+                        "type": "string",
+                        "value": "mild-hybrid"
+                      },
+                      {
+                        "type": "string",
+                        "value": "elektricky"
+                      },
+                      {
+                        "type": "string",
+                        "value": "spalovaci"
+                      },
+                      {
+                        "type": "string",
+                        "value": "vodikovy"
+                      }
+                    ]
+                  },
+                  "optional": false
+                },
+                "cenaOd": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "number"
+                  },
+                  "optional": true
+                },
+                "_type": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string",
+                    "value": "pohonVarianty"
+                  }
+                }
+              },
+              "rest": {
+                "type": "object",
+                "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "optional": true
         },
         "fotky": {
           "type": "objectAttribute",

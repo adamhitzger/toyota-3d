@@ -20,7 +20,7 @@ const vuzKartaFragment = /* groq */ `
   cenaOd,
   typMotoru,
   "foto": varianty[0].fotky[0]{ ${fotkaFragment} },
-  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex, "foto": fotky[0]{ ${fotkaFragment} } }
+  "barvy": varianty[]{ _key, nazevBarvy, "hex": barva.hex, pohony[]{ typMotoru, cenaOd }, "foto": fotky[0]{ ${fotkaFragment} } }
 `
 
 /** Seznam všech vozů, nejlevnější první. */
@@ -89,6 +89,7 @@ export const VUZ_QUERY = defineQuery(/* groq */ `
       _key,
       nazevBarvy,
       "hex": barva.hex,
+      pohony[]{ typMotoru, cenaOd },
       "foto": fotky[0]{ ${fotkaFragment} },
       "pocetFotek": count(fotky)
     },

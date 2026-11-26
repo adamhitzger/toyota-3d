@@ -8,14 +8,15 @@ import { konecPruletu } from "@/components/ScrollVideo"
 import type { VUZ_QUERY_RESULT } from "@/sanity.types"
 import type { Nabidka as Data } from "@/sanity/lib/nabidka"
 
-import OvladaniVozu from "./OvladaniVozu"
+import OvladaniVozu, { VyberPohonu } from "./OvladaniVozu"
 import PanelNabidka from "./PanelNabidka"
 import Poptavka from "./Poptavka"
 import Pruvodkyne from "./Pruvodkyne"
 import SeznamVozu from "./SeznamVozu"
-import { cena, pohon, type Kategorie } from "./texty"
+import { cena, maPohon, pohon, pohonyBarvy, pohonyVozu, type Kategorie, type TypMotoru } from "./texty"
 import { Stitek, Zavrit } from "./ui"
 
+type Vuz = Data["vozy"][number]
 type Detail = NonNullable<VUZ_QUERY_RESULT>
 
 // Rozměr auta na fotkách z konfigurátoru podle modelu (viz Geometrie v CarViewer). Pro nový model
@@ -37,9 +38,11 @@ export default function Nabidka({ data }: { data: Data }) {
     const [seznam, setSeznam] = useState(false)
     const [slug, setSlug] = useState<string | null>(null)
     const [poptavka, setPoptavka] = useState(false)
+    const [zare, setZare] = useState(false)
     // každé otevření poptávky začíná s čistým formulářem
     const [otevreniPoptavky, setOtevreniPoptavky] = useState(0)
     const [barvaKey, setBarvaKey] = useState<string>()
+    const [zvolenyPohon, setZvolenyPohon] = useState<TypMotoru | null>(null)
     const [detaily, setDetaily] = useState<Record<string, Detail>>({})
     const viewer = useRef<CarViewerHandle>(null)
 
@@ -62,10 +65,21 @@ export default function Nabidka({ data }: { data: Data }) {
     }, [slug, detaily])
 
     // dokud detail nedorazí, stačí hlavní fotky barev z karty vozu
-    const varianty: Varianta[] =
+    const vsechny: (Varianta & Pick<Vuz["barvy"][number], "pohony">)[] =
         detail?.varianty ??
         (karta?.barvy.map((b) => ({ ...b, foto: b.foto ?? karta.foto, pocetFotek: 1 })) ?? [])
+    // pohon: nabízejí se jen barvy, které ho mají; barva určuje i cenu
+    const pohonyKarty = karta ? pohonyVozu(karta) : []
+    const aktivniPohon = pohonyKarty.find((t) => t === zvolenyPohon) ?? pohonyKarty[0]
+    const varianty = karta ? vsechny.filter((v) => maPohon(karta, v, aktivniPohon)) : []
     const barva = varianty.find((v) => v._key === barvaKey) ?? varianty[0]
+    const cenaVozu = karta ? (pohonyBarvy(karta, barva).find((p) => p.typMotoru === aktivniPohon)?.cenaOd ?? karta.cenaOd) : 0
+    const zmenPohon = (t: TypMotoru) => {
+        // stejnou barvu ponechat, i když je pro druhý pohon ve vlastní variantě
+        const nova = karta && vsechny.find((v) => v.nazevBarvy === barva?.nazevBarvy && maPohon(karta, v, t))
+        if (nova && barva && !maPohon(karta!, barva, t)) setBarvaKey(nova._key)
+        setZvolenyPohon(t)
+    }
     const verzeModelu = detail?.verzeModelu ?? (karta ? [{ _id: karta._id, nazev: karta.nazev, verze: karta.verze, slug: karta.slug, cenaOd: karta.cenaOd }] : [])
     const vozyModelu = karta ? data.vozy.filter((v) => v.model._id === karta.model._id && v.kategorie === karta.kategorie) : []
 
@@ -73,7 +87,8 @@ export default function Nabidka({ data }: { data: Data }) {
         // barvu podle názvu přenést na jinou verzi, pokud ji má
         const nazevBarvy = barva?.nazevBarvy
         const novy = data.vozy.find((v) => v.slug === s)
-        setBarvaKey(novy?.barvy.find((b) => b.nazevBarvy === nazevBarvy)?._key)
+        const pohonNoveho = novy && (pohonyVozu(novy).find((t) => t === zvolenyPohon) ?? pohonyVozu(novy)[0])
+        setBarvaKey(novy?.barvy.find((b) => b.nazevBarvy === nazevBarvy && maPohon(novy, b, pohonNoveho!))?._key)
         setSlug(s)
         setSeznam(false)
     }
@@ -105,6 +120,7 @@ export default function Nabidka({ data }: { data: Data }) {
             if (window.scrollY >= konecPruletu() / 2) return
             setSlug(null)
             setBarvaKey(undefined)
+            setZvolenyPohon(null)
             setModelId(null)
             setKategorie("modely")
             setSeznam(false)
@@ -122,7 +138,7 @@ export default function Nabidka({ data }: { data: Data }) {
         <div data-reveal className="invisible absolute inset-0">
             {/* auto na koberci */}
             {karta && barva && (
-                <div inert={!autoVidet} className={`${prechod} ${autoVidet ? "opacity-100" : "invisible translate-x-12 opacity-0"}`}>
+                <div inert={!autoVidet} className={`pointer-events-none absolute inset-0 ${prechod} ${autoVidet ? "opacity-100" : "invisible translate-x-12 opacity-0"}`}>
                     <CarViewer
                         ref={viewer}
                         slug={karta.slug}
@@ -140,10 +156,10 @@ export default function Nabidka({ data }: { data: Data }) {
                     className={`absolute left-4 top-[72px] flex max-w-[calc(100%-32px)] flex-col gap-0.5 border border-ink bg-panel px-3.5 py-3 md:hidden ${prechod} ${autoVidet ? "" : "invisible -translate-y-4 opacity-0"}`}
                 >
                     <Stitek>
-                        [ {karta.model.nazev} · {pohon(karta.typMotoru)} ]
+                        [ {karta.model.nazev} · {pohon(aktivniPohon)} ]
                     </Stitek>
                     <h2 className="font-display text-[32px] font-black uppercase leading-[0.95] tracking-[-0.035em] text-ink">{karta.nazev}</h2>
-                    <p className="font-body text-[15px] font-bold text-ink">od {cena(karta.cenaOd)}</p>
+                    <p className="font-body text-[15px] font-bold text-ink">od {cena(cenaVozu)}</p>
                 </div>
             )}
 
@@ -157,23 +173,32 @@ export default function Nabidka({ data }: { data: Data }) {
                     <div className="pointer-events-auto hidden items-end justify-between gap-6 border border-b-0 border-ink bg-panel px-3.5 py-3 md:flex xl:gap-10 xl:px-5 xl:py-4 [@media(max-height:500px)]:py-2">
                         <div className="flex min-w-0 flex-col gap-1.5">
                             <Stitek className="[@media(max-height:500px)]:hidden">
-                                [ {karta.model.nazev} · {pohon(karta.typMotoru)} ]
+                                [ {karta.model.nazev} · {pohon(aktivniPohon)} ]
                             </Stitek>
                             <h2 className="font-display text-[26px] font-black uppercase leading-[0.95] tracking-[-0.035em] text-ink xl:text-[48px]">{karta.nazev}</h2>
                         </div>
+                        {pohonyKarty.length > 1 && (
+                            <div className="flex shrink-0 items-center gap-2">
+                                <VyberPohonu pohony={pohonyKarty} pohon={aktivniPohon} onPohon={zmenPohon} />
+                            </div>
+                        )}
                         <p className="flex shrink-0 flex-col gap-1.5">
                             <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-ink-2 xl:text-[13px] [@media(max-height:500px)]:hidden">Cena od</span>
-                            <span className="font-display text-[22px] font-black leading-[0.95] tracking-[-0.02em] text-ink xl:text-[38px]">{cena(karta.cenaOd)}</span>
+                            <span className="font-display text-[22px] font-black leading-[0.95] tracking-[-0.02em] text-ink xl:text-[38px]">{cena(cenaVozu)}</span>
                         </p>
                     </div>
                     <OvladaniVozu
                         varianty={varianty}
                         barva={barva}
                         onBarva={setBarvaKey}
+                        pohony={pohonyKarty}
+                        pohon={aktivniPohon}
+                        onPohon={zmenPohon}
                         verze={verzeModelu}
                         slug={karta.slug}
                         onVerze={vyberVuz}
                         onOtocit={(deg) => viewer.current?.rotate(deg)}
+                        zare={zare}
                         onPoptat={() => {
                             setOtevreniPoptavky((n) => n + 1)
                             setPoptavka(true)
@@ -218,7 +243,10 @@ export default function Nabidka({ data }: { data: Data }) {
                         vozy={data.vozy}
                         modelId={modelId}
                         onModel={setModelId}
-                        onVuz={vyberVuz}
+                        onVuz={(s) => {
+                            setZvolenyPohon(null)
+                            vyberVuz(s)
+                        }}
                     />
                 </div>
             </div>
@@ -235,7 +263,10 @@ export default function Nabidka({ data }: { data: Data }) {
                         key={otevreniPoptavky}
                         vuz={karta}
                         verze={vozyModelu}
-                        barvaKey={barvaKey ?? barva?._key}
+                        barvaKey={barva?._key}
+                        pohon={aktivniPohon}
+                        cenaOd={cenaVozu}
+                        onPohon={zmenPohon}
                         onVuz={vyberVuz}
                         onBarva={setBarvaKey}
                         onZavrit={() => setPoptavka(false)}
@@ -243,7 +274,7 @@ export default function Nabidka({ data }: { data: Data }) {
                 )}
             </div>
         </div>
-        <Pruvodkyne scena={poptavka ? 6 : seznam ? (modelId ? 4 : 3) : slug ? 5 : 2} />
+        <Pruvodkyne scena={poptavka ? 6 : seznam ? (modelId ? 4 : 3) : slug ? 5 : 2} onPobidka={setZare} />
         </>
     )
 }

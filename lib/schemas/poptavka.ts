@@ -4,6 +4,7 @@ import { z } from "zod"
 const zaklad = z.object({
     vuz: z.string().trim().min(1, "Vyberte vůz"),
     barva: z.string().trim().max(80),
+    pohon: z.string().trim().max(40),
     jmeno: z.string().trim().min(2, "Zadejte jméno a příjmení").max(120),
     telefon: z
         .string()

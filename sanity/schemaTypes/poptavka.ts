@@ -12,6 +12,7 @@ export const poptavka = defineType({
     defineField({name: 'vuz', title: 'Vůz', type: 'reference', to: [{type: 'vuz'}], weak: true}),
     defineField({name: 'nazevVozu', title: 'Název vozu v době poptávky', type: 'string'}),
     defineField({name: 'barva', type: 'string'}),
+    defineField({name: 'pohon', type: 'string'}),
     defineField({name: 'jmeno', title: 'Jméno a příjmení', type: 'string'}),
     defineField({name: 'telefon', type: 'string'}),
     defineField({name: 'email', title: 'E-mail', type: 'string'}),

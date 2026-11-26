@@ -12,7 +12,7 @@ import { odeslatPoptavku } from "@/lib/actions/poptavka"
 import type { PoptavkaInputs } from "@/lib/schemas/poptavka"
 import type { ActionResponse } from "@/types"
 
-import { PRODEJNA, cena, pohon } from "./texty"
+import { PRODEJNA, cena, maPohon, pohon, pohonyVozu, type TypMotoru } from "./texty"
 import { Foto, Stitek, Tlacitko, Zavrit } from "./ui"
 
 type Vuz = VOZY_QUERY_RESULT[number]
@@ -27,6 +27,9 @@ export default function Poptavka({
     vuz: vybrany,
     verze,
     barvaKey,
+    pohon: aktivniPohon,
+    cenaOd,
+    onPohon,
     onVuz,
     onBarva,
     onZavrit,
@@ -35,12 +38,17 @@ export default function Poptavka({
     // vozy stejného modelu v kategorii, mezi kterými jde ve formuláři přepnout
     verze: Vuz[]
     barvaKey: string | undefined
+    pohon: TypMotoru
+    cenaOd: number
+    onPohon: (t: TypMotoru) => void
     onVuz: (slug: string) => void
     onBarva: (key: string) => void
     onZavrit: () => void
 }) {
     const slug = vybrany.slug
-    const vybranaBarva = vybrany.barvy.find((b) => b._key === barvaKey) ?? vybrany.barvy[0]
+    const pohony = pohonyVozu(vybrany)
+    const barvy = vybrany.barvy.filter((b) => maPohon(vybrany, b, aktivniPohon))
+    const vybranaBarva = barvy.find((b) => b._key === barvaKey) ?? barvy[0]
     const foto: Fotka | null = vybranaBarva?.foto ?? vybrany.foto
     const [kontakt, setKontakt] = useState<"telefon" | "email">("telefon")
     // server action odeslatPoptavku (zod + zápis do Sanity), po úspěchu obrazovka „Děkujeme“
@@ -58,8 +66,8 @@ export default function Poptavka({
     const radky: [string, ReactNode][] = [
         ["Model", `${vybrany.model.nazev} ${vybrany.verze ?? ""}`.trim()],
         ["Barva", vybranaBarva?.nazevBarvy],
-        ["Pohon", pohon(vybrany.typMotoru)],
-        ["Cena od", cena(vybrany.cenaOd)],
+        ["Pohon", pohon(aktivniPohon)],
+        ["Cena od", cena(cenaOd)],
         ["Prodejna", PRODEJNA],
     ]
 
@@ -110,6 +118,7 @@ export default function Poptavka({
                     <Past />
                     <input type="hidden" name="vuz" value={slug} />
                     <input type="hidden" name="barva" value={vybranaBarva?._key ?? ""} />
+                    <input type="hidden" name="pohon" value={aktivniPohon} />
                     <div data-lenis-prevent className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-4 md:px-16 md:pb-10 md:pt-10">
                         <div className="mx-auto grid max-w-[1312px] gap-3.5 md:grid-cols-[minmax(0,560px)_minmax(0,560px)] md:justify-between md:gap-x-16">
                             {/* shrnutí vozu */}
@@ -122,7 +131,7 @@ export default function Poptavka({
                                     <Foto foto={foto} width={560} alt={vybrany.nazev} className="aspect-[2048/1165] w-[132px] shrink-0 md:w-full md:bg-transparent" />
                                     <div className="flex flex-col gap-0.5 md:hidden">
                                         <p className="font-display text-[22px] font-black uppercase tracking-[-0.03em] text-ink">{vybrany.nazev}</p>
-                                        <p className="font-body text-[15px] font-bold text-ink">od {cena(vybrany.cenaOd)}</p>
+                                        <p className="font-body text-[15px] font-bold text-ink">od {cena(cenaOd)}</p>
                                     </div>
                                 </div>
                                 <dl className="hidden border-t-[1.5px] border-ink md:block">
@@ -149,13 +158,22 @@ export default function Poptavka({
                                         ))}
                                     </Vyber>
                                     <Vyber label="Barva" value={vybranaBarva?._key ?? ""} onChange={onBarva} vzorek={vybranaBarva?.hex}>
-                                        {vybrany.barvy.map((b) => (
+                                        {barvy.map((b) => (
                                             <option key={b._key} value={b._key}>
                                                 {b.nazevBarvy}
                                             </option>
                                         ))}
                                     </Vyber>
                                 </div>
+                                {pohony.length > 1 && (
+                                    <Vyber label="Pohon" value={aktivniPohon} onChange={(t) => onPohon(t as TypMotoru)}>
+                                        {pohony.map((t) => (
+                                            <option key={t} value={t}>
+                                                {pohon(t)}
+                                            </option>
+                                        ))}
+                                    </Vyber>
+                                )}
                                 <label className="flex flex-col gap-2">
                                     <span className={popisek}>Jméno a příjmení</span>
                                     <input required name="jmeno" autoComplete="name" placeholder="Např. Petra Dvořáková" defaultValue={v?.jmeno} {...a("jmeno")} className={pole} />

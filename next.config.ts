@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
     agentFeedback: true,
+    agentUpgrade: "security",
   },
   // dev server z telefonu v lokální síti (https://192.168.x.x:3000), jinak Next zablokuje dev JS
   // a stránka se neoživí (nic nejde kliknout)

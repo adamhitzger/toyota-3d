@@ -1,4 +1,4 @@
-// Sdílené hodnoty pohonu: Vůz má jeden, Model jejich výčet pro filtr v nabídce
+// Sdílené hodnoty pohonu: Vůz má základní (varianty mohou mít další), Model jejich výčet pro filtr v nabídce
 export const TYPY_MOTORU = [
   {title: 'Hybridní', value: 'hybrid'},
   {title: 'Plug-in hybrid', value: 'plugin-hybrid'},

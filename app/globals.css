@@ -99,7 +99,94 @@ body {
     translate: 0 200%;
   }
 }
+/* Výzva k poptávce: světlo obíhá obrys tlačítka a kolem pulzuje bílo-černá záře */
+@property --zare-uhel {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.zare-poptat {
+  position: relative;
+  z-index: 1;
+  animation: zare-puls 1.8s ease-in-out infinite;
+}
+.zare-poptat::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  pointer-events: none;
+  background: conic-gradient(from var(--zare-uhel), #000, #fff 25%, #000 50%, #fff 75%, #000);
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: zare-obeh 2.4s linear infinite;
+}
+/* nápis v tlačítku: ořez řádku, pod každým písmenem čeká jeho kopie */
+.poptat-napis,
+.poptat-sipka {
+  display: inline-flex;
+  overflow: clip;
+  line-height: 1.3;
+}
+.zare-poptat [data-p] {
+  position: relative;
+  display: inline-block;
+  animation: poptat-pismeno 4s infinite both;
+}
+.zare-poptat [data-p]::after {
+  content: attr(data-p);
+  position: absolute;
+  left: 0;
+  top: 100%;
+}
+.zare-poptat .poptat-sipka [data-p] {
+  animation-name: poptat-sipka;
+  animation-delay: 330ms;
+}
+.zare-poptat .poptat-sipka [data-p]::after {
+  left: -100%;
+  top: 0;
+}
+@keyframes poptat-pismeno {
+  from {
+    translate: 0 0;
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  20%,
+  to {
+    translate: 0 -100%;
+  }
+}
+@keyframes poptat-sipka {
+  from {
+    translate: 0 0;
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  20%,
+  to {
+    translate: 100% 0;
+  }
+}
+@keyframes zare-obeh {
+  to {
+    --zare-uhel: 360deg;
+  }
+}
+@keyframes zare-puls {
+  from,
+  to {
+    box-shadow: 0 0 4px rgb(255 255 255 / 0.6), 0 0 8px 1px rgb(0 0 0 / 0.3), inset 0 0 4px rgb(255 255 255 / 0.15);
+  }
+  50% {
+    box-shadow: 0 0 10px 2px rgb(255 255 255 / 0.95), 0 0 24px 6px rgb(0 0 0 / 0.55), inset 0 0 14px rgb(255 255 255 / 0.4);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  .zare-poptat,
+  .zare-poptat::after,
+  .zare-poptat [data-p],
+  .zare-poptat .poptat-sipka [data-p] {
+    animation: none;
+  }
   .intro-in,
   .intro-radek,
   .intro-skladem::before,

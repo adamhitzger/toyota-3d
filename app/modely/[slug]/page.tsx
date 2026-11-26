@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { cena, nazevKategorie, pohon, type TypMotoru } from "@/components/nabidka/texty"
+import { cena, nazevKategorie, pohony, pohonyVozu } from "@/components/nabidka/texty"
 import { Vzorky } from "@/components/nabidka/SeznamVozu"
 import { Foto, ZpetObsah, zpet } from "@/components/nabidka/ui"
 import JsonLd from "@/components/web/JsonLd"
@@ -12,6 +12,10 @@ import { OG_OBRAZEK, pageSeo, strankaLd } from "@/lib/seo"
 import { nactiModely } from "@/sanity/lib/nabidka"
 
 type Props = { params: Promise<{ slug: string }> }
+
+// Stránky jsou předem vygenerované celé (generateStaticParams). Suspense kvůli okamžité navigaci by
+// u neznámého modelu poslal 200 místo 404, takže se na obsah čeká.
+export const instant = false
 
 export async function generateStaticParams() {
     return (await nactiModely()).map((m) => ({ slug: m.slug }))
@@ -65,13 +69,13 @@ export default async function Page({ params }: Props) {
                         {m.vozy.map((v) => (
                             <li key={v._id} className="flex flex-col gap-3.5 border border-ink bg-panel p-4 md:p-6">
                                 <span className="w-fit border border-ink px-2 py-1 font-mono text-[11px] uppercase tracking-[0.06em]">
-                                    {pohon(v.typMotoru as TypMotoru)}
+                                    {pohony(pohonyVozu(v))}
                                     {v.kategorie !== "modely" && ` · ${nazevKategorie(v.kategorie)}`}
                                 </span>
                                 <h3 className="font-display text-[26px] font-extrabold leading-none tracking-[-0.02em]">{v.nazev}</h3>
                                 <Foto foto={v.foto} width={373} alt={`Toyota ${v.nazev}, ${v.barvy[0]?.nazevBarvy ?? ""}`} className="h-[150px] w-full" />
                                 <Vzorky barvy={v.barvy} velikost="size-5" mezera="gap-1.5" />
-                                <p className="text-[15px] leading-[1.45] text-ink-2">{v.barvy.map((b) => b.nazevBarvy).join(", ")}</p>
+                                <p className="text-[15px] leading-[1.45] text-ink-2">{[...new Set(v.barvy.map((b) => b.nazevBarvy))].join(", ")}</p>
                                 <p className="mt-auto font-display text-2xl font-black tracking-[-0.02em]">od {cena(v.cenaOd)}</p>
                             </li>
                         ))}

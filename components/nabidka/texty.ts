@@ -41,3 +41,15 @@ const czk = new Intl.NumberFormat("cs-CZ", { style: "currency", currency: "CZK",
 export const cena = (n: number) => czk.format(n)
 
 export const PRODEJNA = "Toyota Vysočina.cz, Rantířovská 4844/6, Jihlava"
+
+// Pohony vozu: každá varianta (barva) má vlastní výčet, bez něj platí základní pohon vozu
+type SPohony = { typMotoru: TypMotoru; cenaOd: number; barvy: { pohony: { typMotoru: TypMotoru; cenaOd: number | null }[] | null }[] }
+export const pohonyBarvy = (v: Pick<SPohony, "typMotoru" | "cenaOd">, b: SPohony["barvy"][number] | undefined) =>
+    b?.pohony?.length ? b.pohony.map((p) => ({ typMotoru: p.typMotoru, cenaOd: p.cenaOd ?? v.cenaOd })) : [{ typMotoru: v.typMotoru, cenaOd: v.cenaOd }]
+export function pohonyVozu(v: SPohony): TypMotoru[] {
+    const typy = new Set(v.barvy.flatMap((b) => pohonyBarvy(v, b).map((p) => p.typMotoru)))
+    const serazene = POHONY.map((p) => p.value).filter((t) => typy.has(t))
+    // základní pohon první, je výchozí
+    return typy.has(v.typMotoru) ? [v.typMotoru, ...serazene.filter((t) => t !== v.typMotoru)] : serazene
+}
+export const maPohon = (v: Pick<SPohony, "typMotoru" | "cenaOd">, b: SPohony["barvy"][number], t: TypMotoru) => pohonyBarvy(v, b).some((p) => p.typMotoru === t)

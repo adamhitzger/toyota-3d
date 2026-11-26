@@ -1,4 +1,4 @@
-import { cena, pohony, type TypMotoru } from "@/components/nabidka/texty"
+import { cena, pohony, pohonyVozu } from "@/components/nabidka/texty"
 import { FIRMA } from "@/lib/firma"
 import { ID, url } from "@/lib/seo"
 import { urlFor } from "@/sanity/lib/image"
@@ -7,7 +7,7 @@ import type { ModelSVozy } from "@/sanity/lib/nabidka"
 // Texty a schema.org stránek modelů. Vše jen z dat v Sanity, nic se nedopisuje.
 export const cestaModelu = (slug: string) => `/modely/${slug}`
 export const cenaOd = (m: ModelSVozy) => Math.min(...m.vozy.map((v) => v.cenaOd))
-export const pohonyModelu = (m: ModelSVozy) => pohony([...new Set(m.vozy.map((v) => v.typMotoru))] as TypMotoru[])
+export const pohonyModelu = (m: ModelSVozy) => pohony([...new Set(m.vozy.flatMap(pohonyVozu))])
 export const barvyModelu = (m: ModelSVozy) => [...new Set(m.vozy.flatMap((v) => v.barvy.map((b) => b.nazevBarvy)))]
 export const verzeModelu = (m: ModelSVozy) => [...new Set(m.vozy.map((v) => v.verze ?? v.nazev))]
 
